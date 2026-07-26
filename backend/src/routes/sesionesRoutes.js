@@ -1,8 +1,10 @@
 import express from "express";
-import { obtenerSesiones } from "../controllers/sesionesController.js";
+import { obtenerSesiones, crearSesion } from "../controllers/sesionesController.js";
 
 const router = express.Router();
 
 router.get("/", obtenerSesiones);
+
+router.post("/", crearSesion);
 
 export default router;
