@@ -1,7 +1,7 @@
 Sesion
 ------
 id
-hora_inicio
-hora_fin
+inicio
+fin
 duracion
 estado
