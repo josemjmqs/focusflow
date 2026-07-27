@@ -84,12 +84,58 @@ export const finalizarSesion = async (req, res) => {
     );
 
     res.json(resultadoActualizado.rows[0]);
-
   } catch (error) {
     console.error(error);
 
     res.status(500).json({
       mensaje: "Error al finalizar la sesión",
+    });
+  }
+};
+
+export const cancelarSesion = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const resultado = await pool.query("SELECT * FROM sesiones WHERE id = $1", [
+      id,
+    ]);
+
+    if (resultado.rows.length === 0) {
+      return res.status(404).json({
+        mensaje: "La sesión no existe",
+      });
+    }
+
+    const sesion = resultado.rows[0];
+
+    if (sesion.estado === "cancelada") {
+      return res.status(409).json({
+        mensaje: "La sesión ya está cancelada",
+      });
+    }
+
+    if (sesion.estado !== "completada") {
+      return res.status(409).json({
+        mensaje: "Solo se pueden cancelar sesiones completadas",
+      });
+    }
+
+    const resultadoActualizado = await pool.query(
+      `UPDATE sesiones
+    SET estado = $1
+    WHERE id = $2
+    RETURNING *`,
+      ["cancelada", id],
+    );
+
+    res.json(resultadoActualizado.rows[0]);
+    
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      mensaje: "Error al cancelar la sesión",
     });
   }
 };
