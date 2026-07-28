@@ -83,3 +83,4 @@ Como mínimo el sistema deberá mostrar:
 - Solo una sesión `completada` puede cambiar a `cancelada`.
 - Las sesiones `cancelada` no se consideran en las estadísticas.
 - Las estadísticas diarias, semanales y mensuales consideran que una sesión pertenece al período en el que fue iniciada (`inicio`).
+- Las estadísticas se calculan utilizando la zona horaria de Chile (`America/Santiago`).

@@ -2,7 +2,11 @@ import pool from "../config/database.js";
 
 export const obtenerSesiones = async (req, res) => {
   try {
-    const resultado = await pool.query("SELECT * FROM sesiones");
+    const resultado = await pool.query(
+      `SELECT *
+      FROM sesiones
+      ORDER BY inicio DESC`,
+    );
 
     res.json(resultado.rows);
   } catch (error) {
@@ -130,7 +134,6 @@ export const cancelarSesion = async (req, res) => {
     );
 
     res.json(resultadoActualizado.rows[0]);
-    
   } catch (error) {
     console.error(error);
 
