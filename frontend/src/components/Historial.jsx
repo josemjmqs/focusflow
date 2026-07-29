@@ -23,14 +23,14 @@ function formatearDuracion(segundos) {
     return texto.trim();
   }
 
-function Historial() {
+function Historial({ actualizar }) {
   const [sesiones, setSesiones] = useState([]);
 
   useEffect(() => {
     obtenerSesiones().then((resultado) => {
       setSesiones(resultado);
     });
-  }, []);
+  }, [actualizar]);
 
   return (
     <div>

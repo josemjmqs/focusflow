@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { obtenerEstadisticas } from "../services/api";
 
-function Estadisticas() {
+function Estadisticas({ actualizar }) {
   const [datos, setDatos] = useState(null);
 
   useEffect(() => {
@@ -9,7 +9,7 @@ function Estadisticas() {
       .then((resultado) => {
         setDatos(resultado);
       });
-  }, []);
+  }, [actualizar]);
 
   if (!datos) {
     return <p>Cargando...</p>;
