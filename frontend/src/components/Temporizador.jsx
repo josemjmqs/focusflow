@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { crearSesion, finalizarSesion } from "../services/api";
 
+function formatearTiempo(segundos) {
+  const minutos = Math.floor(segundos / 60);
+  const segundosRestantes = segundos % 60;
+
+  return `${String(minutos).padStart(2, "0")}:${String(segundosRestantes).padStart(2, "0")}`;
+}
+
 function Temporizador({ actualizarDatos }) {
   const [tiempoRestante, setTiempoRestante] = useState(5);
   const [activo, setActivo] = useState(false);
@@ -71,7 +78,7 @@ function Temporizador({ actualizarDatos }) {
     <div>
       <h2>Temporizador</h2>
 
-      <h1>{tiempoRestante}</h1>
+      <h1>{formatearTiempo(tiempoRestante)}</h1>
 
       <button onClick={() => iniciarTemporizador()}>Iniciar</button>
     </div>
