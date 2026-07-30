@@ -14,27 +14,42 @@ function Temporizador({ actualizarDatos }) {
   const [inicio, setInicio] = useState(null);
   const [idSesion, setIdSesion] = useState(null);
   const [duracionSeleccionada, setDuracionSeleccionada] = useState(5);
+  const [modo, setModo] = useState("trabajo");
+  const [pausado, setPausado] = useState(false);
 
-  async function iniciarTemporizador() {
-    console.log("Iniciar temporizador");
-
+  async function iniciarTrabajo() {
     const fechaInicio = new Date();
-
-    console.log("Llamando a crearSesion()");
 
     const sesion = await crearSesion();
 
     setIdSesion(sesion.id);
 
     setInicio(fechaInicio);
+
+    setModo("trabajo");
+
+    setTiempoRestante(duracionSeleccionada);
+
     setActivo(true);
+
+    setPausado(false);
   }
 
-  useEffect(() => {
-    if (!activo) {
-      setTiempoRestante(duracionSeleccionada);
-    }
-  }, [duracionSeleccionada, activo]);
+  async function iniciarTemporizador() {
+    console.log("Iniciar temporizador");
+
+    await iniciarTrabajo();
+  }
+
+  function pausarTemporizador() {
+    setActivo(false);
+    setPausado(true);
+  }
+
+  function reanudarTemporizador() {
+    setActivo(true);
+    setPausado(false);
+  }
 
   useEffect(() => {
     if (!activo) {
@@ -64,27 +79,40 @@ function Temporizador({ actualizarDatos }) {
       return;
     }
 
-    async function finalizar() {
+    async function finalizarTemporizador() {
       console.log("Terminó el temporizador");
 
-      await finalizarSesion(idSesion, 1500);
+      if (modo === "trabajo") {
+        const duracion = duracionSeleccionada - tiempoRestante;
 
-      setInicio(null);
-      actualizarDatos();
-      setIdSesion(null);
+        await finalizarSesion(idSesion, duracion);
 
-      setTimeout(() => {
-        setTiempoRestante(duracionSeleccionada);
-      }, 1000);
+        setInicio(null);
+        actualizarDatos();
+        setIdSesion(null);
+
+        setModo("descanso");
+        setTiempoRestante(3);
+        setActivo(true);
+
+        setTimeout(() => {
+          setTiempoRestante(3);
+          setActivo(true);
+        }, 1000);
+      } else {
+        setTimeout(() => {
+          iniciarTrabajo();
+        }, 1000);
+      }
     }
 
-    finalizar();
-  }, [tiempoRestante]);
+    finalizarTemporizador();
+  }, [tiempoRestante, modo, idSesion]);
 
   return (
     <div>
       <h2>Temporizador</h2>
-
+      <h3>{modo === "trabajo" ? "🍅 Trabajo" : "☕ Descanso"}</h3>
       <h1>{formatearTiempo(tiempoRestante)}</h1>
 
       <label htmlFor="duracion">Duración:</label>
@@ -99,9 +127,15 @@ function Temporizador({ actualizarDatos }) {
         <option value={1500}>25 minutos</option>
         <option value={2700}>45 minutos</option>
       </select>
-      <button onClick={iniciarTemporizador} disabled={activo}>
-        {activo ? "En progreso..." : "Iniciar"}
-      </button>
+      {!activo && !pausado && (
+        <button onClick={iniciarTemporizador}>Iniciar</button>
+      )}
+
+      {activo && <button onClick={pausarTemporizador}>⏸ Pausar</button>}
+
+      {!activo && pausado && (
+        <button onClick={reanudarTemporizador}>▶ Reanudar</button>
+      )}
     </div>
   );
 }

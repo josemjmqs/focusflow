@@ -24,9 +24,15 @@ export const crearSesion = async (sesion) => {
   return respuesta.json();
 };
 
-export const finalizarSesion = async (id) => {
+export const finalizarSesion = async (id, duracion) => {
   const respuesta = await fetch(`${API_URL}/sesiones/${id}`, {
     method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      duracion,
+    }),
   });
 
   return respuesta.json();

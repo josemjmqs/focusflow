@@ -54,10 +54,12 @@ export const crearSesion = async (req, res) => {
 export const finalizarSesion = async (req, res) => {
   try {
     const { id } = req.params;
+    const { duracion } = req.body;
 
-    const resultado = await pool.query("SELECT * FROM sesiones WHERE id = $1", [
-      id,
-    ]);
+    const resultado = await pool.query(
+      "SELECT * FROM sesiones WHERE id = $1",
+      [id],
+    );
 
     if (resultado.rows.length === 0) {
       return res.status(404).json({
@@ -75,8 +77,6 @@ export const finalizarSesion = async (req, res) => {
 
     const fin = new Date();
 
-    const duracion = Math.floor((fin - sesion.inicio) / 1000);
-
     const resultadoActualizado = await pool.query(
       `UPDATE sesiones
       SET fin = $1,
@@ -88,6 +88,7 @@ export const finalizarSesion = async (req, res) => {
     );
 
     res.json(resultadoActualizado.rows[0]);
+
   } catch (error) {
     console.error(error);
 
