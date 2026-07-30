@@ -31,3 +31,25 @@ export const finalizarSesion = async (id) => {
 
   return respuesta.json();
 };
+
+export const cancelarSesion = async (id) => {
+  const respuesta = await fetch(
+    `${API_URL}/sesiones/${id}/cancelar`,
+    {
+      method: "PATCH",
+    }
+  );
+
+  return respuesta.json();
+};
+
+export const restaurarSesion = async (id) => {
+  const respuesta = await fetch(
+    `${API_URL}/sesiones/${id}/restaurar`,
+    {
+      method: "PATCH",
+    }
+  );
+
+  return respuesta.json();
+};

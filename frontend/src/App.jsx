@@ -18,7 +18,10 @@ function App() {
 
       <Estadisticas actualizar={actualizar} />
 
-      <Historial actualizar={actualizar} />
+      <Historial
+        actualizar={actualizar}
+        cambiarActualizacion={actualizarDatos}
+      />
     </>
   );
 }

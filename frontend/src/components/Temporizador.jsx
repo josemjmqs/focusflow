@@ -80,7 +80,9 @@ function Temporizador({ actualizarDatos }) {
 
       <h1>{formatearTiempo(tiempoRestante)}</h1>
 
-      <button onClick={() => iniciarTemporizador()}>Iniciar</button>
+      <button onClick={iniciarTemporizador} disabled={activo}>
+        {activo ? "En progreso..." : "Iniciar"}
+      </button>
     </div>
   );
 }
