@@ -13,6 +13,7 @@ function Temporizador({ actualizarDatos }) {
   const [activo, setActivo] = useState(false);
   const [inicio, setInicio] = useState(null);
   const [idSesion, setIdSesion] = useState(null);
+  const [duracionSeleccionada, setDuracionSeleccionada] = useState(5);
 
   async function iniciarTemporizador() {
     console.log("Iniciar temporizador");
@@ -28,6 +29,12 @@ function Temporizador({ actualizarDatos }) {
     setInicio(fechaInicio);
     setActivo(true);
   }
+
+  useEffect(() => {
+    if (!activo) {
+      setTiempoRestante(duracionSeleccionada);
+    }
+  }, [duracionSeleccionada, activo]);
 
   useEffect(() => {
     if (!activo) {
@@ -67,7 +74,7 @@ function Temporizador({ actualizarDatos }) {
       setIdSesion(null);
 
       setTimeout(() => {
-        setTiempoRestante(5);
+        setTiempoRestante(duracionSeleccionada);
       }, 1000);
     }
 
@@ -80,6 +87,18 @@ function Temporizador({ actualizarDatos }) {
 
       <h1>{formatearTiempo(tiempoRestante)}</h1>
 
+      <label htmlFor="duracion">Duración:</label>
+
+      <select
+        id="duracion"
+        value={duracionSeleccionada}
+        onChange={(e) => setDuracionSeleccionada(Number(e.target.value))}
+        disabled={activo}
+      >
+        <option value={5}>5 segundos</option>
+        <option value={1500}>25 minutos</option>
+        <option value={2700}>45 minutos</option>
+      </select>
       <button onClick={iniciarTemporizador} disabled={activo}>
         {activo ? "En progreso..." : "Iniciar"}
       </button>
