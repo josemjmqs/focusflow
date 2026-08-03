@@ -51,6 +51,28 @@ function Temporizador({ actualizarDatos }) {
     setPausado(false);
   }
 
+  function reproducirAlarma() {
+    const contexto = new AudioContext();
+
+    const oscilador = contexto.createOscillator();
+    const ganancia = contexto.createGain();
+
+    oscilador.connect(ganancia);
+    ganancia.connect(contexto.destination);
+
+    oscilador.frequency.value = 800; // tono
+    oscilador.type = "sine";
+
+    ganancia.gain.value = 0.3;
+
+    oscilador.start();
+
+    setTimeout(() => {
+      oscilador.stop();
+      contexto.close();
+    }, 1000);
+  }
+
   useEffect(() => {
     if (!activo) {
       return;
@@ -81,6 +103,8 @@ function Temporizador({ actualizarDatos }) {
 
     async function finalizarTemporizador() {
       console.log("Terminó el temporizador");
+
+      reproducirAlarma();
 
       if (modo === "trabajo") {
         const duracion = duracionSeleccionada - tiempoRestante;

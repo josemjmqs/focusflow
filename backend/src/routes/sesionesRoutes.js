@@ -6,13 +6,14 @@ import {
   cancelarSesion,
   restaurarSesion,
 } from "../controllers/sesionesController.js";
+import { verificarToken } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/", obtenerSesiones);
-router.post("/", crearSesion);
-router.put("/:id", finalizarSesion);
-router.patch("/:id/cancelar", cancelarSesion);
-router.patch("/:id/restaurar", restaurarSesion);
+router.get("/", verificarToken, obtenerSesiones);
+router.post("/", verificarToken, crearSesion);
+router.put("/:id", verificarToken, finalizarSesion);
+router.patch("/:id/cancelar", verificarToken, cancelarSesion);
+router.patch("/:id/restaurar", verificarToken, restaurarSesion);
 
 export default router;

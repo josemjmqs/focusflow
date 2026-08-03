@@ -2,35 +2,41 @@ import pool from "../config/database.js";
 
 export const obtenerEstadisticas = async (req, res) => {
   try {
+    const usuarioId = req.usuario.id;
+
     const resultado = await pool.query(
       `SELECT SUM(duracion) AS tiempo_hoy
       FROM sesiones
       WHERE estado = $1
+      AND usuario_id = $2
       AND DATE(inicio) = CURRENT_DATE;`,
-      ["completada"],
+      ["completada", usuarioId],
     );
 
     const resultadoSemana = await pool.query(
       `SELECT SUM(duracion) AS tiempo_semana
-        FROM sesiones
-        WHERE estado = $1
-        AND inicio >= DATE_TRUNC('week', CURRENT_DATE);`,
-      ["completada"],
+      FROM sesiones
+      WHERE estado = $1
+      AND usuario_id = $2
+      AND inicio >= DATE_TRUNC('week', CURRENT_DATE);`,
+      ["completada", usuarioId],
     );
 
     const resultadoMes = await pool.query(
       `SELECT SUM(duracion) AS tiempo_mes
       FROM sesiones
       WHERE estado = $1
+      AND usuario_id = $2
       AND inicio >= DATE_TRUNC('month', CURRENT_DATE);`,
-      ["completada"],
+      ["completada", usuarioId],
     );
 
     const resultadoCantidad = await pool.query(
       `SELECT COUNT(*) AS sesiones_completadas
       FROM sesiones
-      WHERE estado = $1`,
-      ["completada"],
+      WHERE estado = $1
+      AND usuario_id = $2`,
+      ["completada", usuarioId],
     );
 
     res.json({
@@ -40,6 +46,7 @@ export const obtenerEstadisticas = async (req, res) => {
       sesionesCompletadas:
         Number(resultadoCantidad.rows[0].sesiones_completadas) || 0,
     });
+
   } catch (error) {
     console.error(error);
 

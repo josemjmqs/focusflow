@@ -2,10 +2,14 @@ import pool from "../config/database.js";
 
 export const obtenerSesiones = async (req, res) => {
   try {
+    const usuarioId = req.usuario.id;
+
     const resultado = await pool.query(
       `SELECT *
-      FROM sesiones
-      ORDER BY inicio DESC`,
+       FROM sesiones
+       WHERE usuario_id = $1
+       ORDER BY inicio DESC`,
+      [usuarioId],
     );
 
     res.json(resultado.rows);
@@ -19,10 +23,15 @@ export const obtenerSesiones = async (req, res) => {
 };
 
 export const crearSesion = async (req, res) => {
+  const usuarioId = req.usuario.id;
+
   try {
     const resultado = await pool.query(
-      "SELECT * FROM sesiones WHERE estado = $1",
-      ["en_progreso"],
+      `SELECT *
+      FROM sesiones
+      WHERE usuario_id = $1
+      AND estado = $2`,
+      [usuarioId, "en_progreso"],
     );
 
     if (resultado.rows.length > 0) {
@@ -35,10 +44,14 @@ export const crearSesion = async (req, res) => {
     const estado = "en_progreso";
 
     const nuevaSesion = await pool.query(
-      `INSERT INTO sesiones (inicio, estado)
-       VALUES ($1, $2)
-       RETURNING *`,
-      [inicio, estado],
+      `INSERT INTO sesiones (
+        usuario_id,
+        inicio,
+        estado
+      )
+      VALUES ($1, $2, $3)
+      RETURNING *`,
+      [usuarioId, inicio, estado],
     );
 
     res.status(201).json(nuevaSesion.rows[0]);
@@ -56,9 +69,14 @@ export const finalizarSesion = async (req, res) => {
     const { id } = req.params;
     const { duracion } = req.body;
 
+    const usuarioId = req.usuario.id;
+
     const resultado = await pool.query(
-      "SELECT * FROM sesiones WHERE id = $1",
-      [id],
+      `SELECT *
+      FROM sesiones
+      WHERE id = $1
+      AND usuario_id = $2`,
+      [id, usuarioId],
     );
 
     if (resultado.rows.length === 0) {
@@ -88,7 +106,6 @@ export const finalizarSesion = async (req, res) => {
     );
 
     res.json(resultadoActualizado.rows[0]);
-
   } catch (error) {
     console.error(error);
 
@@ -101,10 +118,15 @@ export const finalizarSesion = async (req, res) => {
 export const cancelarSesion = async (req, res) => {
   try {
     const { id } = req.params;
+    const usuarioId = req.usuario.id;
 
-    const resultado = await pool.query("SELECT * FROM sesiones WHERE id = $1", [
-      id,
-    ]);
+    const resultado = await pool.query(
+      `SELECT *
+       FROM sesiones
+       WHERE id = $1
+       AND usuario_id = $2`,
+      [id, usuarioId],
+    );
 
     if (resultado.rows.length === 0) {
       return res.status(404).json({
@@ -128,13 +150,15 @@ export const cancelarSesion = async (req, res) => {
 
     const resultadoActualizado = await pool.query(
       `UPDATE sesiones
-    SET estado = $1
-    WHERE id = $2
-    RETURNING *`,
-      ["cancelada", id],
+       SET estado = $1
+       WHERE id = $2
+       AND usuario_id = $3
+       RETURNING *`,
+      ["cancelada", id, usuarioId],
     );
 
     res.json(resultadoActualizado.rows[0]);
+
   } catch (error) {
     console.error(error);
 
@@ -147,10 +171,14 @@ export const cancelarSesion = async (req, res) => {
 export const restaurarSesion = async (req, res) => {
   try {
     const { id } = req.params;
+    const usuarioId = req.usuario.id;
 
     const resultado = await pool.query(
-      "SELECT * FROM sesiones WHERE id = $1",
-      [id]
+      `SELECT *
+       FROM sesiones
+       WHERE id = $1
+       AND usuario_id = $2`,
+      [id, usuarioId],
     );
 
     if (resultado.rows.length === 0) {
@@ -171,8 +199,9 @@ export const restaurarSesion = async (req, res) => {
       `UPDATE sesiones
        SET estado = $1
        WHERE id = $2
+       AND usuario_id = $3
        RETURNING *`,
-      ["completada", id]
+      ["completada", id, usuarioId],
     );
 
     res.json(resultadoActualizado.rows[0]);
