@@ -11,7 +11,13 @@ const manejarRespuesta = async (respuesta) => {
     return;
   }
 
-  return respuesta.json();
+  const datos = await respuesta.json();
+
+  if (!respuesta.ok) {
+    throw new Error(datos.mensaje || "Error en la petición");
+  }
+
+  return datos;
 };
 
 export const obtenerEstadisticas = async () => {
@@ -94,6 +100,16 @@ export const login = async (email, password) => {
       email,
       password,
     }),
+  });
+
+  return manejarRespuesta(respuesta);
+};
+
+export const obtenerSesionEnProgreso = async () => {
+  const respuesta = await fetch(`${API_URL}/sesiones/en-progreso`, {
+    headers: {
+      Authorization: `Bearer ${obtenerToken()}`,
+    },
   });
 
   return manejarRespuesta(respuesta);

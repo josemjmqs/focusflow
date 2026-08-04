@@ -16,6 +16,9 @@ function Temporizador({ actualizarDatos }) {
   const [duracionSeleccionada, setDuracionSeleccionada] = useState(5);
   const [modo, setModo] = useState("trabajo");
   const [pausado, setPausado] = useState(false);
+  const [tiempoTerminado, setTiempoTerminado] = useState(false);
+  const [tiempoExtra, setTiempoExtra] = useState(0);
+  const [alarmaActiva, setAlarmaActiva] = useState(false);
 
   async function iniciarTrabajo() {
     const fechaInicio = new Date();
@@ -27,8 +30,11 @@ function Temporizador({ actualizarDatos }) {
     setInicio(fechaInicio);
 
     setModo("trabajo");
-
     setTiempoRestante(duracionSeleccionada);
+
+    setTiempoTerminado(false);
+    setTiempoExtra(0);
+    setAlarmaActiva(false);
 
     setActivo(true);
 
@@ -49,6 +55,58 @@ function Temporizador({ actualizarDatos }) {
   function reanudarTemporizador() {
     setActivo(true);
     setPausado(false);
+  }
+
+  function seguirTrabajando() {
+    setAlarmaActiva(false);
+  }
+
+  function seguirDescansando() {
+    setAlarmaActiva(false);
+  }
+
+  async function empezarConcentracion() {
+    setTiempoTerminado(false);
+    setAlarmaActiva(false);
+    setTiempoExtra(0);
+
+    await iniciarTrabajo();
+  }
+
+  async function terminarTrabajo() {
+    if (!idSesion || !inicio) {
+      return;
+    }
+
+    const fin = new Date();
+
+    const duracion = Math.floor((fin - inicio) / 1000);
+
+    await finalizarSesion(idSesion, duracion);
+
+    setInicio(null);
+    setIdSesion(null);
+
+    actualizarDatos();
+  }
+
+  async function terminarSesionManual() {
+    await terminarTrabajo();
+
+    setActivo(false);
+    setTiempoTerminado(false);
+    setTiempoExtra(0);
+  }
+
+  async function iniciarDescanso() {
+    await terminarTrabajo();
+
+    setModo("descanso");
+    setTiempoTerminado(false);
+    setAlarmaActiva(false);
+    setTiempoExtra(0);
+    setTiempoRestante(3);
+    setActivo(true);
   }
 
   function reproducirAlarma() {
@@ -74,15 +132,22 @@ function Temporizador({ actualizarDatos }) {
   }
 
   useEffect(() => {
-    if (!activo) {
+    if (tiempoRestante === 0) {
+      reproducirAlarma();
+    }
+  }, [tiempoRestante]);
+
+  useEffect(() => {
+    if (!activo || tiempoTerminado) {
       return;
     }
 
     const intervalo = setInterval(() => {
       setTiempoRestante((anterior) => {
         if (anterior <= 1) {
-          clearInterval(intervalo);
-          setActivo(false);
+          setTiempoTerminado(true);
+          setAlarmaActiva(true);
+          setActivo(true);
 
           return 0;
         }
@@ -94,50 +159,29 @@ function Temporizador({ actualizarDatos }) {
     return () => {
       clearInterval(intervalo);
     };
-  }, [activo]);
+  }, [activo, tiempoTerminado]);
 
   useEffect(() => {
-    if (tiempoRestante !== 0) {
+    if (!activo || !tiempoTerminado) {
       return;
     }
 
-    async function finalizarTemporizador() {
-      console.log("Terminó el temporizador");
+    const intervalo = setInterval(() => {
+      setTiempoExtra((anterior) => anterior + 1);
+    }, 1000);
 
-      reproducirAlarma();
-
-      if (modo === "trabajo") {
-        const duracion = duracionSeleccionada - tiempoRestante;
-
-        await finalizarSesion(idSesion, duracion);
-
-        setInicio(null);
-        actualizarDatos();
-        setIdSesion(null);
-
-        setModo("descanso");
-        setTiempoRestante(3);
-        setActivo(true);
-
-        setTimeout(() => {
-          setTiempoRestante(3);
-          setActivo(true);
-        }, 1000);
-      } else {
-        setTimeout(() => {
-          iniciarTrabajo();
-        }, 1000);
-      }
-    }
-
-    finalizarTemporizador();
-  }, [tiempoRestante, modo, idSesion]);
+    return () => clearInterval(intervalo);
+  }, [activo, tiempoTerminado]);
 
   return (
     <div>
       <h2>Temporizador</h2>
       <h3>{modo === "trabajo" ? "🍅 Trabajo" : "☕ Descanso"}</h3>
-      <h1>{formatearTiempo(tiempoRestante)}</h1>
+      <h1>
+        {tiempoTerminado
+          ? `+${formatearTiempo(tiempoExtra)}`
+          : formatearTiempo(tiempoRestante)}
+      </h1>
 
       <label htmlFor="duracion">Duración:</label>
 
@@ -159,6 +203,32 @@ function Temporizador({ actualizarDatos }) {
 
       {!activo && pausado && (
         <button onClick={reanudarTemporizador}>▶ Reanudar</button>
+      )}
+
+      {idSesion && (
+        <button onClick={terminarSesionManual}>Terminar sesión</button>
+      )}
+
+      {tiempoTerminado && modo === "trabajo" && (
+        <div>
+          <h3>Terminaste tu tiempo de concentración 🍅</h3>
+
+          <button onClick={iniciarDescanso}>Iniciar descanso ☕</button>
+
+          <button onClick={seguirTrabajando}>Seguir concentrado 💪</button>
+        </div>
+      )}
+
+      {tiempoTerminado && modo === "descanso" && (
+        <div>
+          <h3>Terminó tu descanso ☕</h3>
+
+          <button onClick={empezarConcentracion}>
+            🍅 Empezar concentración
+          </button>
+
+          <button onClick={seguirDescansando}>😌 Seguir descansando</button>
+        </div>
       )}
     </div>
   );

@@ -2,7 +2,12 @@ import Estadisticas from "./components/Estadisticas";
 import Historial from "./components/Historial";
 import Temporizador from "./components/Temporizador";
 import Login from "./components/Login";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import {
+  obtenerSesionEnProgreso,
+  cancelarSesion,
+  finalizarSesion,
+} from "./services/api";
 
 function App() {
   const [actualizar, setActualizar] = useState(0);
@@ -10,6 +15,8 @@ function App() {
   const [autenticado, setAutenticado] = useState(
     localStorage.getItem("token") !== null,
   );
+
+  const [sesionPendiente, setSesionPendiente] = useState(null);
 
   const actualizarDatos = () => {
     setActualizar((anterior) => anterior + 1);
@@ -19,6 +26,27 @@ function App() {
     setAutenticado(true);
   }
 
+  useEffect(() => {
+    if (autenticado) {
+      obtenerSesionEnProgreso().then((sesion) => {
+        setSesionPendiente(sesion);
+      });
+    }
+  }, [autenticado]);
+
+  async function manejarCancelarSesion() {
+    await cancelarSesion(sesionPendiente.id);
+
+    setSesionPendiente(null);
+  }
+
+  async function manejarCompletarSesion() {
+    await finalizarSesion(sesionPendiente.id, 1500);
+
+    setSesionPendiente(null);
+    actualizarDatos();
+  }
+
   function cerrarSesion() {
     localStorage.removeItem("token");
     setAutenticado(false);
@@ -26,6 +54,23 @@ function App() {
 
   if (!autenticado) {
     return <Login onLogin={manejarLogin} />;
+  }
+
+  if (sesionPendiente) {
+    return (
+      <>
+        <h1>FocusFlow</h1>
+
+        <p>
+          Encontramos una sesión pendiente iniciada el:{" "}
+          {new Date(sesionPendiente.inicio).toLocaleString()}
+        </p>
+
+        <button onClick={manejarCompletarSesion}>Completar sesión</button>
+
+        <button onClick={manejarCancelarSesion}>Cancelar sesión</button>
+      </>
+    );
   }
 
   return (

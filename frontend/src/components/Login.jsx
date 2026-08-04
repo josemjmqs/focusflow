@@ -6,14 +6,20 @@ function Login({ onLogin }) {
   const [password, setPassword] = useState("");
 
   async function iniciarSesion() {
-    const respuesta = await login(email, password);
+    try {
+      const respuesta = await login(email, password);
 
-    if (respuesta.token) {
-      localStorage.setItem("token", respuesta.token);
+      if (respuesta.token) {
+        localStorage.setItem("token", respuesta.token);
 
-      onLogin();
-    } else {
-      alert("Correo o contraseña incorrectos");
+        onLogin();
+      } else {
+        alert("Correo o contraseña incorrectos");
+      }
+    } catch (error) {
+      console.error(error);
+
+      alert("Error al conectar con el servidor");
     }
   }
 
@@ -39,9 +45,7 @@ function Login({ onLogin }) {
 
       <br />
 
-      <button onClick={iniciarSesion}>
-        Iniciar sesión
-      </button>
+      <button onClick={iniciarSesion}>Iniciar sesión</button>
     </div>
   );
 }

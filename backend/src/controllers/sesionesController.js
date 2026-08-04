@@ -101,8 +101,9 @@ export const finalizarSesion = async (req, res) => {
           duracion = $2,
           estado = $3
       WHERE id = $4
+      AND usuario_id = $5
       RETURNING *`,
-      [fin, duracion, "completada", id],
+      [fin, duracion, "completada", id, usuarioId],
     );
 
     res.json(resultadoActualizado.rows[0]);
@@ -158,7 +159,6 @@ export const cancelarSesion = async (req, res) => {
     );
 
     res.json(resultadoActualizado.rows[0]);
-
   } catch (error) {
     console.error(error);
 
@@ -205,12 +205,39 @@ export const restaurarSesion = async (req, res) => {
     );
 
     res.json(resultadoActualizado.rows[0]);
-
   } catch (error) {
     console.error(error);
 
     res.status(500).json({
       mensaje: "Error al restaurar la sesión",
+    });
+  }
+};
+
+export const obtenerSesionEnProgreso = async (req, res) => {
+  try {
+    const usuarioId = req.usuario.id;
+
+    const resultado = await pool.query(
+      `
+      SELECT *
+      FROM sesiones
+      WHERE usuario_id = $1
+      AND estado = $2
+      `,
+      [usuarioId, "en_progreso"],
+    );
+
+    if (resultado.rows.length === 0) {
+      return res.json(null);
+    }
+
+    res.json(resultado.rows[0]);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      mensaje: "Error al obtener sesión en progreso",
     });
   }
 };
