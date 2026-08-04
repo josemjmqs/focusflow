@@ -2,6 +2,7 @@ import Estadisticas from "./components/Estadisticas";
 import Historial from "./components/Historial";
 import Temporizador from "./components/Temporizador";
 import Login from "./components/Login";
+import Registro from "./components/Registro";
 import { useState, useEffect } from "react";
 import {
   obtenerSesionEnProgreso,
@@ -11,6 +12,8 @@ import {
 
 function App() {
   const [actualizar, setActualizar] = useState(0);
+
+  const [mostrarRegistro, setMostrarRegistro] = useState(false);
 
   const [autenticado, setAutenticado] = useState(
     localStorage.getItem("token") !== null,
@@ -53,7 +56,16 @@ function App() {
   }
 
   if (!autenticado) {
-    return <Login onLogin={manejarLogin} />;
+    if (mostrarRegistro) {
+      return <Registro volverAlLogin={() => setMostrarRegistro(false)} />;
+    }
+
+    return (
+      <Login
+        onLogin={manejarLogin}
+        crearCuenta={() => setMostrarRegistro(true)}
+      />
+    );
   }
 
   if (sesionPendiente) {

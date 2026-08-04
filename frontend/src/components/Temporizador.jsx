@@ -1,13 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { crearSesion, finalizarSesion } from "../services/api";
 
-function formatearTiempo(segundos) {
-  const minutos = Math.floor(segundos / 60);
-  const segundosRestantes = segundos % 60;
-
-  return `${String(minutos).padStart(2, "0")}:${String(segundosRestantes).padStart(2, "0")}`;
-}
-
 function Temporizador({ actualizarDatos }) {
   // Temporizador
   const [tiempoRestante, setTiempoRestante] = useState(5);
@@ -30,96 +23,18 @@ function Temporizador({ actualizarDatos }) {
   // Configuración
   const [duracionSeleccionada, setDuracionSeleccionada] = useState(5);
 
-  async function iniciarTrabajo() {
-    const fechaInicio = new Date();
+  // Funciones auxiliares
+  function formatearTiempo(segundos) {
+    const minutos = Math.floor(segundos / 60);
+    const segundosRestantes = segundos % 60;
 
-    const sesion = await crearSesion();
-
-    setIdSesion(sesion.id);
-
-    setInicio(fechaInicio);
-
-    setModo("trabajo");
-    setTiempoRestante(duracionSeleccionada);
-
-    reiniciarEstadoTemporizador();
-
-    setActivo(true);
-
-    setPausado(false);
-  }
-
-  async function iniciarTemporizador() {
-    console.log("Iniciar temporizador");
-
-    await iniciarTrabajo();
-  }
-
-  function pausarTemporizador() {
-    setActivo(false);
-    setPausado(true);
-  }
-
-  function reanudarTemporizador() {
-    setActivo(true);
-    setPausado(false);
+    return `${String(minutos).padStart(2, "0")}:${String(segundosRestantes).padStart(2, "0")}`;
   }
 
   function reiniciarEstadoTemporizador() {
     setTiempoTerminado(false);
     setTiempoExtra(0);
     setAlarmaActiva(false);
-  }
-
-  function seguirTrabajando() {
-    setAlarmaActiva(false);
-  }
-
-  function seguirDescansando() {
-    setAlarmaActiva(false);
-  }
-
-  async function terminarTrabajo() {
-    if (!idSesion || !inicio) {
-      return;
-    }
-
-    const fin = new Date();
-
-    const duracion = Math.floor((fin - inicio) / 1000);
-
-    await finalizarSesion(idSesion, duracion);
-
-    setInicio(null);
-    setIdSesion(null);
-
-    actualizarDatos();
-  }
-
-  async function terminarSesionManual() {
-    setAlarmaActiva(false);
-
-    await terminarTrabajo();
-
-    setActivo(false);
-    reiniciarEstadoTemporizador();
-  }
-
-  async function iniciarDescanso() {
-    setAlarmaActiva(false);
-
-    await terminarTrabajo();
-
-    setModo("descanso");
-    reiniciarEstadoTemporizador();
-    setTiempoRestante(3);
-    setActivo(true);
-  }
-
-  async function empezarConcentracion() {
-    reiniciarEstadoTemporizador();
-
-    await iniciarTrabajo();
   }
 
   function reproducirAlarma() {
@@ -157,14 +72,96 @@ function Temporizador({ actualizarDatos }) {
     ganancia.current = null;
   }
 
-  useEffect(() => {
-    if (alarmaActiva) {
-      reproducirAlarma();
-    } else {
-      detenerAlarma();
-    }
-  }, [alarmaActiva]);
+  // Funciones relacionadas con sesiones
+  async function iniciarTrabajo() {
+    const fechaInicio = new Date();
 
+    const sesion = await crearSesion();
+
+    setIdSesion(sesion.id);
+
+    setInicio(fechaInicio);
+
+    setModo("trabajo");
+    setTiempoRestante(duracionSeleccionada);
+
+    reiniciarEstadoTemporizador();
+
+    setActivo(true);
+
+    setPausado(false);
+  }
+
+  async function terminarTrabajo() {
+    if (!idSesion || !inicio) {
+      return;
+    }
+
+    const fin = new Date();
+
+    const duracion = Math.floor((fin - inicio) / 1000);
+
+    await finalizarSesion(idSesion, duracion);
+
+    setInicio(null);
+    setIdSesion(null);
+
+    actualizarDatos();
+  }
+
+  async function terminarSesionManual() {
+    setAlarmaActiva(false);
+
+    await terminarTrabajo();
+
+    setActivo(false);
+    reiniciarEstadoTemporizador();
+  }
+
+  // Manejo del temporizador
+  async function iniciarTemporizador() {
+    console.log("Iniciar temporizador");
+
+    await iniciarTrabajo();
+  }
+
+  function pausarTemporizador() {
+    setActivo(false);
+    setPausado(true);
+  }
+
+  function reanudarTemporizador() {
+    setActivo(true);
+    setPausado(false);
+  }
+
+  // Decisiones del usuario
+  function seguirTrabajando() {
+    setAlarmaActiva(false);
+  }
+
+  function seguirDescansando() {
+    setAlarmaActiva(false);
+  }
+
+  async function iniciarDescanso() {
+    setAlarmaActiva(false);
+
+    await terminarTrabajo();
+
+    setModo("descanso");
+    reiniciarEstadoTemporizador();
+    setTiempoRestante(3);
+    setActivo(true);
+  }
+
+  async function empezarConcentracion() {
+    reiniciarEstadoTemporizador();
+
+    await iniciarTrabajo();
+  }
+
+  // Effects
   useEffect(() => {
     if (!activo || tiempoTerminado) {
       return;
@@ -200,6 +197,36 @@ function Temporizador({ actualizarDatos }) {
 
     return () => clearInterval(intervalo);
   }, [activo, tiempoTerminado]);
+
+  useEffect(() => {
+    if (alarmaActiva) {
+      reproducirAlarma();
+    } else {
+      detenerAlarma();
+    }
+  }, [alarmaActiva]);
+
+  const esTrabajo = modo === "trabajo";
+
+  const tituloDialogo = esTrabajo
+    ? "Terminaste tu tiempo de concentración 🍅"
+    : "Terminaste tu descanso ☕";
+
+  const textoBotonPrincipal = esTrabajo
+    ? "Iniciar descanso ☕"
+    : "Empezar concentración 🍅";
+
+  const accionBotonPrincipal = esTrabajo
+    ? iniciarDescanso
+    : empezarConcentracion;
+
+  const textoBotonSecundario = esTrabajo
+    ? "Seguir concentrado 💪"
+    : "Seguir descansando 😌";
+
+  const accionBotonSecundario = esTrabajo
+    ? seguirTrabajando
+    : seguirDescansando;
 
   return (
     <div>
@@ -237,25 +264,15 @@ function Temporizador({ actualizarDatos }) {
         <button onClick={terminarSesionManual}>Terminar sesión</button>
       )}
 
-      {tiempoTerminado && modo === "trabajo" && (
+      {tiempoTerminado && (
         <div>
-          <h3>Terminaste tu tiempo de concentración 🍅</h3>
+          <h3>{tituloDialogo}</h3>
 
-          <button onClick={iniciarDescanso}>Iniciar descanso ☕</button>
+          <button onClick={accionBotonPrincipal}>{textoBotonPrincipal}</button>
 
-          <button onClick={seguirTrabajando}>Seguir concentrado 💪</button>
-        </div>
-      )}
-
-      {tiempoTerminado && modo === "descanso" && (
-        <div>
-          <h3>Terminó tu descanso ☕</h3>
-
-          <button onClick={empezarConcentracion}>
-            🍅 Empezar concentración
+          <button onClick={accionBotonSecundario}>
+            {textoBotonSecundario}
           </button>
-
-          <button onClick={seguirDescansando}>😌 Seguir descansando</button>
         </div>
       )}
     </div>

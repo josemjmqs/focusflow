@@ -20,41 +20,44 @@ const manejarRespuesta = async (respuesta) => {
   return datos;
 };
 
+async function realizarPeticion(url, opciones = {}) {
+  try {
+    const respuesta = await fetch(url, opciones);
+
+    return manejarRespuesta(respuesta);
+  } catch {
+    throw new Error("No fue posible conectarse con el servidor.");
+  }
+}
+
 export const obtenerEstadisticas = async () => {
-  const respuesta = await fetch(`${API_URL}/estadisticas`, {
+  return realizarPeticion(`${API_URL}/estadisticas`, {
     headers: {
       Authorization: `Bearer ${obtenerToken()}`,
     },
   });
-
-  return manejarRespuesta(respuesta);
 };
 
 export const obtenerSesiones = async () => {
-  const respuesta = await fetch(`${API_URL}/sesiones`, {
+  return realizarPeticion(`${API_URL}/sesiones`, {
     headers: {
       Authorization: `Bearer ${obtenerToken()}`,
     },
   });
-
-  return manejarRespuesta(respuesta);
 };
 
-export const crearSesion = async (sesion) => {
-  const respuesta = await fetch(`${API_URL}/sesiones`, {
+export const crearSesion = async () => {
+  return realizarPeticion(`${API_URL}/sesiones`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${obtenerToken()}`,
     },
-    body: JSON.stringify(sesion),
   });
-
-  return manejarRespuesta(respuesta);
 };
 
 export const finalizarSesion = async (id, duracion) => {
-  const respuesta = await fetch(`${API_URL}/sesiones/${id}`, {
+  return realizarPeticion(`${API_URL}/sesiones/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -64,34 +67,28 @@ export const finalizarSesion = async (id, duracion) => {
       duracion,
     }),
   });
-
-  return manejarRespuesta(respuesta);
 };
 
 export const cancelarSesion = async (id) => {
-  const respuesta = await fetch(`${API_URL}/sesiones/${id}/cancelar`, {
+  return realizarPeticion(`${API_URL}/sesiones/${id}/cancelar`, {
     method: "PATCH",
     headers: {
       Authorization: `Bearer ${obtenerToken()}`,
     },
   });
-
-  return manejarRespuesta(respuesta);
 };
 
 export const restaurarSesion = async (id) => {
-  const respuesta = await fetch(`${API_URL}/sesiones/${id}/restaurar`, {
+  return realizarPeticion(`${API_URL}/sesiones/${id}/restaurar`, {
     method: "PATCH",
     headers: {
       Authorization: `Bearer ${obtenerToken()}`,
     },
   });
-
-  return manejarRespuesta(respuesta);
 };
 
 export const login = async (email, password) => {
-  const respuesta = await fetch(`${API_URL}/auth/login`, {
+  return realizarPeticion(`${API_URL}/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -101,16 +98,26 @@ export const login = async (email, password) => {
       password,
     }),
   });
+};
 
-  return manejarRespuesta(respuesta);
+export const register = async (nombre, email, password) => {
+  return realizarPeticion(`${API_URL}/auth/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      nombre,
+      email,
+      password,
+    }),
+  });
 };
 
 export const obtenerSesionEnProgreso = async () => {
-  const respuesta = await fetch(`${API_URL}/sesiones/en-progreso`, {
+  return realizarPeticion(`${API_URL}/sesiones/en-progreso`, {
     headers: {
       Authorization: `Bearer ${obtenerToken()}`,
     },
   });
-
-  return manejarRespuesta(respuesta);
 };

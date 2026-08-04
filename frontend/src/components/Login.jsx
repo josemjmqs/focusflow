@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { login } from "../services/api";
 
-function Login({ onLogin }) {
+function Login({ onLogin, crearCuenta }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -9,17 +9,11 @@ function Login({ onLogin }) {
     try {
       const respuesta = await login(email, password);
 
-      if (respuesta.token) {
-        localStorage.setItem("token", respuesta.token);
+      localStorage.setItem("token", respuesta.token);
 
-        onLogin();
-      } else {
-        alert("Correo o contraseña incorrectos");
-      }
+      onLogin();
     } catch (error) {
-      console.error(error);
-
-      alert("Error al conectar con el servidor");
+      alert(error.message);
     }
   }
 
@@ -46,6 +40,16 @@ function Login({ onLogin }) {
       <br />
 
       <button onClick={iniciarSesion}>Iniciar sesión</button>
+
+      <p>¿No tienes cuenta?</p>
+      <button
+        onClick={() => {
+          console.log("Crear cuenta");
+          crearCuenta();
+        }}
+      >
+        Crear cuenta
+      </button>
     </div>
   );
 }
