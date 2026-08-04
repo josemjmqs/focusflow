@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { crearSesion, finalizarSesion } from "../services/api";
 
 function formatearTiempo(segundos) {
@@ -9,16 +9,26 @@ function formatearTiempo(segundos) {
 }
 
 function Temporizador({ actualizarDatos }) {
+  // Temporizador
   const [tiempoRestante, setTiempoRestante] = useState(5);
-  const [activo, setActivo] = useState(false);
-  const [inicio, setInicio] = useState(null);
-  const [idSesion, setIdSesion] = useState(null);
-  const [duracionSeleccionada, setDuracionSeleccionada] = useState(5);
+  const [tiempoExtra, setTiempoExtra] = useState(0);
+  const contextoAudio = useRef(null);
+  const oscilador = useRef(null);
+  const ganancia = useRef(null);
+
+  // Estado
   const [modo, setModo] = useState("trabajo");
+  const [activo, setActivo] = useState(false);
   const [pausado, setPausado] = useState(false);
   const [tiempoTerminado, setTiempoTerminado] = useState(false);
-  const [tiempoExtra, setTiempoExtra] = useState(0);
   const [alarmaActiva, setAlarmaActiva] = useState(false);
+
+  // Sesión
+  const [inicio, setInicio] = useState(null);
+  const [idSesion, setIdSesion] = useState(null);
+
+  // Configuración
+  const [duracionSeleccionada, setDuracionSeleccionada] = useState(5);
 
   async function iniciarTrabajo() {
     const fechaInicio = new Date();
@@ -32,9 +42,7 @@ function Temporizador({ actualizarDatos }) {
     setModo("trabajo");
     setTiempoRestante(duracionSeleccionada);
 
-    setTiempoTerminado(false);
-    setTiempoExtra(0);
-    setAlarmaActiva(false);
+    reiniciarEstadoTemporizador();
 
     setActivo(true);
 
@@ -57,20 +65,18 @@ function Temporizador({ actualizarDatos }) {
     setPausado(false);
   }
 
+  function reiniciarEstadoTemporizador() {
+    setTiempoTerminado(false);
+    setTiempoExtra(0);
+    setAlarmaActiva(false);
+  }
+
   function seguirTrabajando() {
     setAlarmaActiva(false);
   }
 
   function seguirDescansando() {
     setAlarmaActiva(false);
-  }
-
-  async function empezarConcentracion() {
-    setTiempoTerminado(false);
-    setAlarmaActiva(false);
-    setTiempoExtra(0);
-
-    await iniciarTrabajo();
   }
 
   async function terminarTrabajo() {
@@ -91,51 +97,73 @@ function Temporizador({ actualizarDatos }) {
   }
 
   async function terminarSesionManual() {
+    setAlarmaActiva(false);
+
     await terminarTrabajo();
 
     setActivo(false);
-    setTiempoTerminado(false);
-    setTiempoExtra(0);
+    reiniciarEstadoTemporizador();
   }
 
   async function iniciarDescanso() {
+    setAlarmaActiva(false);
+
     await terminarTrabajo();
 
     setModo("descanso");
-    setTiempoTerminado(false);
-    setAlarmaActiva(false);
-    setTiempoExtra(0);
+    reiniciarEstadoTemporizador();
     setTiempoRestante(3);
     setActivo(true);
   }
 
+  async function empezarConcentracion() {
+    reiniciarEstadoTemporizador();
+
+    await iniciarTrabajo();
+  }
+
   function reproducirAlarma() {
-    const contexto = new AudioContext();
+    if (contextoAudio.current) {
+      return;
+    }
 
-    const oscilador = contexto.createOscillator();
-    const ganancia = contexto.createGain();
+    contextoAudio.current = new AudioContext();
 
-    oscilador.connect(ganancia);
-    ganancia.connect(contexto.destination);
+    oscilador.current = contextoAudio.current.createOscillator();
+    ganancia.current = contextoAudio.current.createGain();
 
-    oscilador.frequency.value = 800; // tono
-    oscilador.type = "sine";
+    oscilador.current.connect(ganancia.current);
+    ganancia.current.connect(contextoAudio.current.destination);
 
-    ganancia.gain.value = 0.3;
+    oscilador.current.frequency.value = 800;
+    oscilador.current.type = "sine";
 
-    oscilador.start();
+    ganancia.current.gain.value = 0.3;
 
-    setTimeout(() => {
-      oscilador.stop();
-      contexto.close();
-    }, 1000);
+    oscilador.current.start();
+  }
+
+  function detenerAlarma() {
+    if (!contextoAudio.current) {
+      return;
+    }
+
+    oscilador.current.stop();
+
+    contextoAudio.current.close();
+
+    contextoAudio.current = null;
+    oscilador.current = null;
+    ganancia.current = null;
   }
 
   useEffect(() => {
-    if (tiempoRestante === 0) {
+    if (alarmaActiva) {
       reproducirAlarma();
+    } else {
+      detenerAlarma();
     }
-  }, [tiempoRestante]);
+  }, [alarmaActiva]);
 
   useEffect(() => {
     if (!activo || tiempoTerminado) {
