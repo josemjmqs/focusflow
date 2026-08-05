@@ -50,9 +50,21 @@ Cada registro debe mostrar como mínimo:
 
 ---
 
-## RF-05: Cancelar una sesión
+## RF-05: Cancelar una sesión en progreso
 
-El usuario debe poder cancelar una sesión completada para que no sea considerada en las estadísticas.
+El usuario debe poder cancelar una sesión que se encuentre en estado `en_progreso`.
+
+**Flujo básico:**
+
+1. El usuario visualiza una sesión pendiente.
+2. El usuario presiona el botón **"Cancelar"**.
+3. El sistema cambia el estado de la sesión a `cancelada`.
+
+---
+
+## RF-06: Cancelar una sesión completada
+
+El usuario debe poder cancelar una sesión completada desde el historial para que no sea considerada en las estadísticas.
 
 **Flujo básico:**
 
@@ -62,7 +74,7 @@ El usuario debe poder cancelar una sesión completada para que no sea considerad
 
 ---
 
-## RF-06: Consultar estadísticas
+## RF-07: Consultar estadísticas
 
 El usuario debe poder visualizar estadísticas de concentración.
 
@@ -80,7 +92,8 @@ Como mínimo el sistema deberá mostrar:
 - Solo puede existir una sesión con estado `en_progreso`.
 - Una sesión se crea con estado `en_progreso`.
 - Una sesión finalizada cambia automáticamente a `completada`.
-- Solo una sesión `completada` puede cambiar a `cancelada`.
+- Una sesión `en_progreso` puede cambiar a `cancelada`.
+- Una sesión `completada` puede cambiar a `cancelada`.
 - Las sesiones `cancelada` no se consideran en las estadísticas.
 - Las estadísticas diarias, semanales y mensuales consideran que una sesión pertenece al período en el que fue iniciada (`inicio`).
 - Las estadísticas se calculan utilizando la zona horaria de Chile (`America/Santiago`).
