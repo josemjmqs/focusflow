@@ -31,6 +31,16 @@ function Temporizador({ actualizarDatos }) {
     return `${String(minutos).padStart(2, "0")}:${String(segundosRestantes).padStart(2, "0")}`;
   }
 
+  function calcularSegundosTranscurridos() {
+    if (!inicio) return 0;
+
+    console.log("Inicio:", inicio);
+    console.log("Date.now():", Date.now());
+    console.log("inicio.getTime():", inicio.getTime());
+
+    return Math.floor((Date.now() - inicio.getTime()) / 1000);
+  }
+
   function reiniciarEstadoTemporizador() {
     setTiempoTerminado(false);
     setTiempoExtra(0);
@@ -168,23 +178,33 @@ function Temporizador({ actualizarDatos }) {
     }
 
     const intervalo = setInterval(() => {
-      setTiempoRestante((anterior) => {
-        if (anterior <= 1) {
-          setTiempoTerminado(true);
-          setAlarmaActiva(true);
-          setActivo(true);
+      const transcurrido = calcularSegundosTranscurridos();
 
-          return 0;
-        }
-
-        return anterior - 1;
+      console.log({
+        inicio,
+        ahora: new Date(),
+        transcurrido,
+        duracionSeleccionada,
       });
+
+      const restante = duracionSeleccionada - transcurrido;
+
+      if (restante <= 0) {
+        setTiempoRestante(0);
+
+        setTiempoTerminado(true);
+        setAlarmaActiva(true);
+
+        return;
+      }
+
+      setTiempoRestante(restante);
     }, 1000);
 
     return () => {
       clearInterval(intervalo);
     };
-  }, [activo, tiempoTerminado]);
+  }, [activo, tiempoTerminado, inicio, duracionSeleccionada]);
 
   useEffect(() => {
     if (!activo || !tiempoTerminado) {
@@ -205,6 +225,33 @@ function Temporizador({ actualizarDatos }) {
       detenerAlarma();
     }
   }, [alarmaActiva]);
+
+  useEffect(() => {
+  function actualizarAlVolver() {
+    if (!activo || !inicio || tiempoTerminado) return;
+
+    const transcurrido = calcularSegundosTranscurridos();
+    const restante = duracionSeleccionada - transcurrido;
+
+    if (restante <= 0) {
+      setTiempoRestante(0);
+      setTiempoTerminado(true);
+      setAlarmaActiva(true);
+      return;
+    }
+
+    setTiempoRestante(restante);
+  }
+
+  document.addEventListener("visibilitychange", actualizarAlVolver);
+
+  return () => {
+    document.removeEventListener(
+      "visibilitychange",
+      actualizarAlVolver
+    );
+  };
+}, [activo, inicio, tiempoTerminado, duracionSeleccionada]);
 
   const esTrabajo = modo === "trabajo";
 
