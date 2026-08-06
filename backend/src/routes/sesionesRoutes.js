@@ -4,8 +4,9 @@ import {
   crearSesion,
   finalizarSesion,
   cancelarSesion,
+  cancelarSesionEnProgreso,
   restaurarSesion,
-  obtenerSesionEnProgreso
+  obtenerSesionEnProgreso,
 } from "../controllers/sesionesController.js";
 import { verificarToken } from "../middleware/authMiddleware.js";
 
@@ -15,6 +16,11 @@ router.get("/", verificarToken, obtenerSesiones);
 router.post("/", verificarToken, crearSesion);
 router.put("/:id", verificarToken, finalizarSesion);
 router.patch("/:id/cancelar", verificarToken, cancelarSesion);
+router.patch(
+  "/:id/cancelar-en-progreso",
+  verificarToken,
+  cancelarSesionEnProgreso,
+);
 router.patch("/:id/restaurar", verificarToken, restaurarSesion);
 router.get("/en-progreso", verificarToken, obtenerSesionEnProgreso);
 

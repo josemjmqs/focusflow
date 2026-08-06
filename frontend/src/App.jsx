@@ -6,7 +6,7 @@ import Registro from "./components/Registro";
 import { useState, useEffect } from "react";
 import {
   obtenerSesionEnProgreso,
-  cancelarSesion,
+  cancelarSesionEnProgreso,
   finalizarSesion,
 } from "./services/api";
 
@@ -38,7 +38,7 @@ function App() {
   }, [autenticado]);
 
   async function manejarCancelarSesion() {
-    await cancelarSesion(sesionPendiente.id);
+    await cancelarSesionEnProgreso(sesionPendiente.id);
 
     setSesionPendiente(null);
   }

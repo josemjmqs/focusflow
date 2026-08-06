@@ -78,6 +78,15 @@ export const cancelarSesion = async (id) => {
   });
 };
 
+export const cancelarSesionEnProgreso = async (id) => {
+  return realizarPeticion(`${API_URL}/sesiones/${id}/cancelar-en-progreso`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${obtenerToken()}`,
+    },
+  });
+};
+
 export const restaurarSesion = async (id) => {
   return realizarPeticion(`${API_URL}/sesiones/${id}/restaurar`, {
     method: "PATCH",
