@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { obtenerEstadisticas } from "../services/api";
+import { formatearDuracion } from "../utils/formatearDuracion";
 
 function Estadisticas({ actualizar }) {
   const [datos, setDatos] = useState(null);
 
   useEffect(() => {
-    obtenerEstadisticas()
-      .then((resultado) => {
-        setDatos(resultado);
-      });
+    obtenerEstadisticas().then((resultado) => {
+      setDatos(resultado);
+    });
   }, [actualizar]);
 
   if (!datos) {
@@ -19,9 +19,9 @@ function Estadisticas({ actualizar }) {
     <div>
       <h2>Estadísticas</h2>
 
-      <p>Hoy: {datos.tiempoHoy} segundos</p>
-      <p>Semana: {datos.tiempoSemana} segundos</p>
-      <p>Mes: {datos.tiempoMes} segundos</p>
+      <p>Hoy: {formatearDuracion(datos.tiempoHoy)}</p>
+      <p>Semana: {formatearDuracion(datos.tiempoSemana)}</p>
+      <p>Mes: {formatearDuracion(datos.tiempoMes)}</p>
       <p>Sesiones: {datos.sesionesCompletadas}</p>
     </div>
   );
