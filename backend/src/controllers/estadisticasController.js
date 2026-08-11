@@ -22,6 +22,19 @@ export const obtenerEstadisticas = async (req, res) => {
       ["completada", usuarioId],
     );
 
+    const resultadoPorDia = await pool.query(
+      `SELECT
+        DATE(inicio) AS dia,
+        COALESCE(SUM(duracion), 0) AS tiempo
+      FROM sesiones
+      WHERE estado = $1
+        AND usuario_id = $2
+        AND inicio >= DATE_TRUNC('week', CURRENT_DATE)
+      GROUP BY DATE(inicio)
+      ORDER BY dia;`,
+      ["completada", usuarioId],
+    );
+
     const resultadoMes = await pool.query(
       `SELECT SUM(duracion) AS tiempo_mes
       FROM sesiones
@@ -46,7 +59,6 @@ export const obtenerEstadisticas = async (req, res) => {
       sesionesCompletadas:
         Number(resultadoCantidad.rows[0].sesiones_completadas) || 0,
     });
-
   } catch (error) {
     console.error(error);
 
