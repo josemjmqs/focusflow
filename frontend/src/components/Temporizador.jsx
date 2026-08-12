@@ -20,6 +20,7 @@ function Temporizador({ actualizarDatos }) {
   const [inicioSesion, setInicioSesion] = useState(null);
   const [inicioTemporizador, setInicioTemporizador] = useState(null);
   const [duracionActual, setDuracionActual] = useState(0);
+  const [tiempoAcumulado, setTiempoAcumulado] = useState(0);
   const [idSesion, setIdSesion] = useState(null);
 
   // Configuración
@@ -35,10 +36,13 @@ function Temporizador({ actualizarDatos }) {
 
   function calcularSegundosTranscurridos() {
     if (!inicioTemporizador) {
-      return 0;
+      return tiempoAcumulado;
     }
 
-    return Math.floor((Date.now() - inicioTemporizador.getTime()) / 1000);
+    return (
+      tiempoAcumulado +
+      Math.floor((Date.now() - inicioTemporizador.getTime()) / 1000)
+    );
   }
 
   function reiniciarEstadoTemporizador() {
@@ -92,6 +96,7 @@ function Temporizador({ actualizarDatos }) {
 
     setInicioSesion(fechaInicio);
     setInicioTemporizador(fechaInicio);
+    setTiempoAcumulado(0);
     setDuracionActual(duracionSeleccionada);
 
     setModo("trabajo");
@@ -108,14 +113,13 @@ function Temporizador({ actualizarDatos }) {
       return;
     }
 
-    const fin = new Date();
-
-    const duracion = Math.floor((fin - inicioSesion) / 1000);
+    const duracion = calcularSegundosTranscurridos();
 
     await finalizarSesion(idSesion, duracion);
 
     setInicioSesion(null);
     setInicioTemporizador(null);
+    setTiempoAcumulado(0);
     setDuracionActual(0);
     setIdSesion(null);
 
@@ -139,11 +143,18 @@ function Temporizador({ actualizarDatos }) {
   }
 
   function pausarTemporizador() {
+    const transcurrido = calcularSegundosTranscurridos();
+
+    setTiempoAcumulado(transcurrido);
+    setInicioTemporizador(null);
+
     setActivo(false);
     setPausado(true);
   }
 
   function reanudarTemporizador() {
+    setInicioTemporizador(new Date());
+
     setActivo(true);
     setPausado(false);
   }
@@ -228,35 +239,30 @@ function Temporizador({ actualizarDatos }) {
   }, [alarmaActiva]);
 
   useEffect(() => {
-  function actualizarAlVolver() {
-    if (!activo || !inicioTemporizador || tiempoTerminado) {
-      return;
+    function actualizarAlVolver() {
+      if (!activo || !inicioTemporizador || tiempoTerminado) {
+        return;
+      }
+
+      const transcurrido = calcularSegundosTranscurridos();
+      const restante = duracionActual - transcurrido;
+
+      if (restante <= 0) {
+        setTiempoRestante(0);
+        setTiempoTerminado(true);
+        setAlarmaActiva(true);
+        return;
+      }
+
+      setTiempoRestante(restante);
     }
 
-    const transcurrido = calcularSegundosTranscurridos();
-    const restante = duracionActual - transcurrido;
+    document.addEventListener("visibilitychange", actualizarAlVolver);
 
-    if (restante <= 0) {
-      setTiempoRestante(0);
-      setTiempoTerminado(true);
-      setAlarmaActiva(true);
-      return;
-    }
-
-    setTiempoRestante(restante);
-  }
-
-  document.addEventListener("visibilitychange", actualizarAlVolver);
-
-  return () => {
-    document.removeEventListener("visibilitychange", actualizarAlVolver);
-  };
-}, [
-  activo,
-  inicioTemporizador,
-  tiempoTerminado,
-  duracionActual,
-]);
+    return () => {
+      document.removeEventListener("visibilitychange", actualizarAlVolver);
+    };
+  }, [activo, inicioTemporizador, tiempoTerminado, duracionActual]);
 
   const esTrabajo = modo === "trabajo";
 
