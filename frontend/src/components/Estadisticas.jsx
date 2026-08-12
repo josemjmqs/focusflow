@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+
 import { obtenerEstadisticas } from "../services/api";
 import { formatearDuracion } from "../utils/formatearDuracion";
+
 import "./Estadisticas.css";
 
 function Estadisticas({ actualizar }) {
@@ -33,25 +35,23 @@ function Estadisticas({ actualizar }) {
     <div className="estadisticas">
       <h2 className="estadisticas-titulo">Estadísticas</h2>
 
-      <div className="estadisticas-resumen">
-        <div className="estadistica">
-          <h3>Hoy</h3>
-          <p>{formatearDuracion(datos.tiempoHoy)}</p>
-        </div>
+      <div className="estadistica-hoy">
+        <h3>Hoy</h3>
 
-        <div className="estadistica">
-          <h3>Sesiones hoy</h3>
-          <p>{datos.sesionesHoy}</p>
-        </div>
+        <div className="estadistica-hoy-datos">
+          <div>
+            <span className="estadistica-hoy-valor">
+              {formatearDuracion(datos.tiempoHoy)}
+            </span>
 
-        <div className="estadistica">
-          <h3>Esta semana</h3>
-          <p>{formatearDuracion(datos.tiempoSemana)}</p>
-        </div>
+            <span>Tiempo de concentración</span>
+          </div>
 
-        <div className="estadistica">
-          <h3>Este mes</h3>
-          <p>{formatearDuracion(datos.tiempoMes)}</p>
+          <div>
+            <span className="estadistica-hoy-valor">{datos.sesionesHoy}</span>
+
+            <span>Sesiones</span>
+          </div>
         </div>
       </div>
 
