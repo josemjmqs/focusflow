@@ -15,6 +15,7 @@ function Temporizador({ actualizarDatos }) {
   const [pausado, setPausado] = useState(false);
   const [tiempoTerminado, setTiempoTerminado] = useState(false);
   const [alarmaActiva, setAlarmaActiva] = useState(false);
+  const [error, setError] = useState("");
 
   // Sesión
   const [inicioSesion, setInicioSesion] = useState(null);
@@ -140,9 +141,10 @@ function Temporizador({ actualizarDatos }) {
     console.log("Iniciar temporizador");
 
     try {
+      setError("");
       await iniciarTrabajo();
     } catch (error) {
-      alert(error.message);
+      setError(error.message);
     }
   }
 
@@ -324,6 +326,20 @@ function Temporizador({ actualizarDatos }) {
 
       {idSesion && (
         <button onClick={terminarSesionManual}>Terminar sesión</button>
+      )}
+
+      {error && (
+        <p
+          style={{
+            color: "#b91c1c",
+            backgroundColor: "#fee2e2",
+            padding: "10px 14px",
+            borderRadius: "6px",
+            margin: "10px 0",
+          }}
+        >
+          {error}
+        </p>
       )}
 
       {tiempoTerminado && (
