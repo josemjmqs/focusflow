@@ -18,10 +18,10 @@ function Estadisticas({ actualizar }) {
     return <p>Cargando...</p>;
   }
 
-  console.log(datos.tiempoPorDia);
-
   function obtenerNombreDia(fecha) {
-    const fechaLocal = new Date(fecha);
+    const [año, mes, dia] = fecha.split("-");
+
+    const fechaLocal = new Date(año, mes - 1, dia);
 
     return fechaLocal.toLocaleDateString("es-CL", {
       weekday: "short",

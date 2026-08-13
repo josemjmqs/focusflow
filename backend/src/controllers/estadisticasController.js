@@ -35,11 +35,11 @@ export const obtenerEstadisticas = async (req, res) => {
       FROM generate_series(
         DATE_TRUNC(
           'week',
-          CURRENT_TIMESTAMP AT TIME ZONE 'America/Santiago'
+          (CURRENT_TIMESTAMP AT TIME ZONE 'America/Santiago')::date
         ),
         DATE_TRUNC(
           'week',
-          CURRENT_TIMESTAMP AT TIME ZONE 'America/Santiago'
+          (CURRENT_TIMESTAMP AT TIME ZONE 'America/Santiago')::date
         ) + INTERVAL '6 days',
         INTERVAL '1 day'
       ) AS dias(dia)
@@ -97,7 +97,7 @@ export const obtenerEstadisticas = async (req, res) => {
       sesionesHoy: Number(resultadoSesionesHoy.rows[0].sesiones_hoy) || 0,
 
       tiempoPorDia: resultadoPorDia.rows.map((fila) => ({
-        dia: fila.dia,
+        dia: fila.dia.toISOString().split("T")[0],
         tiempo: Number(fila.tiempo) || 0,
       })),
     });
