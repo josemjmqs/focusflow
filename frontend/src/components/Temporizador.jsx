@@ -139,7 +139,11 @@ function Temporizador({ actualizarDatos }) {
   async function iniciarTemporizador() {
     console.log("Iniciar temporizador");
 
-    await iniciarTrabajo();
+    try {
+      await iniciarTrabajo();
+    } catch (error) {
+      alert(error.message);
+    }
   }
 
   function pausarTemporizador() {

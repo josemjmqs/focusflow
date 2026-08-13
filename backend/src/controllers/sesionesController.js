@@ -56,6 +56,12 @@ export const crearSesion = async (req, res) => {
 
     res.status(201).json(nuevaSesion.rows[0]);
   } catch (error) {
+    if (error.code === "23505") {
+      return res.status(409).json({
+        mensaje: "Ya existe una sesión en progreso",
+      });
+    }
+
     console.error(error.message);
 
     res.status(500).json({
