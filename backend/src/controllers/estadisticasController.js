@@ -6,33 +6,45 @@ export const obtenerEstadisticas = async (req, res) => {
 
     const resultado = await pool.query(
       `SELECT SUM(duracion) AS tiempo_hoy
-       FROM sesiones
-       WHERE estado = $1
-         AND usuario_id = $2
-         AND DATE(inicio) = CURRENT_DATE;`,
+      FROM sesiones
+      WHERE estado = $1
+        AND usuario_id = $2
+        AND (inicio AT TIME ZONE 'America/Santiago')::date =
+         (CURRENT_TIMESTAMP AT TIME ZONE 'America/Santiago')::date;`,
       ["completada", usuarioId],
     );
 
     const resultadoSemana = await pool.query(
       `SELECT SUM(duracion) AS tiempo_semana
-       FROM sesiones
-       WHERE estado = $1
-         AND usuario_id = $2
-         AND inicio >= DATE_TRUNC('week', CURRENT_DATE);`,
+      FROM sesiones
+      WHERE estado = $1
+        AND usuario_id = $2
+        AND inicio >= (
+      DATE_TRUNC(
+        'week',
+        CURRENT_TIMESTAMP AT TIME ZONE 'America/Santiago'
+      ) AT TIME ZONE 'America/Santiago'
+    );`,
       ["completada", usuarioId],
     );
 
     const resultadoPorDia = await pool.query(
       `SELECT
-        dias.dia,
+        dias.dia::date AS dia,
         COALESCE(SUM(s.duracion), 0) AS tiempo
       FROM generate_series(
-        DATE_TRUNC('week', CURRENT_DATE),
-        DATE_TRUNC('week', CURRENT_DATE) + INTERVAL '6 days',
+        DATE_TRUNC(
+          'week',
+          CURRENT_TIMESTAMP AT TIME ZONE 'America/Santiago'
+        ),
+        DATE_TRUNC(
+          'week',
+          CURRENT_TIMESTAMP AT TIME ZONE 'America/Santiago'
+        ) + INTERVAL '6 days',
         INTERVAL '1 day'
       ) AS dias(dia)
       LEFT JOIN sesiones s
-        ON DATE(s.inicio) = DATE(dias.dia)
+        ON (s.inicio AT TIME ZONE 'America/Santiago')::date = dias.dia::date
         AND s.estado = $1
         AND s.usuario_id = $2
       GROUP BY dias.dia
@@ -42,10 +54,15 @@ export const obtenerEstadisticas = async (req, res) => {
 
     const resultadoMes = await pool.query(
       `SELECT SUM(duracion) AS tiempo_mes
-       FROM sesiones
-       WHERE estado = $1
-         AND usuario_id = $2
-         AND inicio >= DATE_TRUNC('month', CURRENT_DATE);`,
+      FROM sesiones
+      WHERE estado = $1
+        AND usuario_id = $2
+        AND inicio >= (
+      DATE_TRUNC(
+        'month',
+        CURRENT_TIMESTAMP AT TIME ZONE 'America/Santiago'
+      ) AT TIME ZONE 'America/Santiago'
+    );`,
       ["completada", usuarioId],
     );
 
@@ -59,10 +76,11 @@ export const obtenerEstadisticas = async (req, res) => {
 
     const resultadoSesionesHoy = await pool.query(
       `SELECT COUNT(*) AS sesiones_hoy
-       FROM sesiones
-       WHERE estado = $1
-         AND usuario_id = $2
-         AND DATE(inicio) = CURRENT_DATE;`,
+      FROM sesiones
+      WHERE estado = $1
+        AND usuario_id = $2
+        AND (inicio AT TIME ZONE 'America/Santiago')::date =
+         (CURRENT_TIMESTAMP AT TIME ZONE 'America/Santiago')::date;`,
       ["completada", usuarioId],
     );
 

@@ -18,6 +18,8 @@ function Estadisticas({ actualizar }) {
     return <p>Cargando...</p>;
   }
 
+  console.log(datos.tiempoPorDia);
+
   function obtenerNombreDia(fecha) {
     const fechaLocal = new Date(fecha);
 
