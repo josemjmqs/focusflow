@@ -31,7 +31,17 @@ function Historial({ actualizar, cambiarActualizacion }) {
     cambiarActualizacion();
 
     const resultado = await obtenerSesiones();
+
     setSesiones(resultado);
+  }
+
+  function formatearFechaHora(fecha) {
+    const fechaLocal = new Date(fecha);
+
+    return fechaLocal.toLocaleString("es-CL", {
+      dateStyle: "short",
+      timeStyle: "short",
+    });
   }
 
   return (
@@ -40,26 +50,24 @@ function Historial({ actualizar, cambiarActualizacion }) {
 
       {sesiones.map((sesion) => (
         <div key={sesion.id}>
-          <p>Inicio: {new Date(sesion.inicio).toLocaleDateString("es-CL")}</p>
+          <p>Inicio: {formatearFechaHora(sesion.inicio)}</p>
 
-          <p>
-            Hora:{" "}
-            {new Date(sesion.inicio).toLocaleTimeString("es-CL", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </p>
-          <p>Fin: {sesion.fin}</p>
+          <p>Fin: {formatearFechaHora(sesion.fin)}</p>
+
           <p>Duración: {formatearDuracion(sesion.duracion)}</p>
+
           <p>Estado: {sesion.estado}</p>
+
           {sesion.estado === "completada" && (
             <button onClick={() => handleCancelar(sesion.id)}>Cancelar</button>
           )}
+
           {sesion.estado === "cancelada" && (
             <button onClick={() => handleRestaurar(sesion.id)}>
               Restaurar
             </button>
           )}
+
           <hr />
         </div>
       ))}
