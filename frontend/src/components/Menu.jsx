@@ -14,11 +14,17 @@ function Menu({ mostrarHistorial, cerrarSesion }) {
   }
 
   return (
-    <div>
-      <button onClick={() => setAbierto(!abierto)}>⋮</button>
+    <div className="menu">
+      <button
+        className="boton-menu"
+        onClick={() => setAbierto(!abierto)}
+        aria-label="Abrir menú"
+      >
+        ☰
+      </button>
 
       {abierto && (
-        <div>
+        <div className="menu-desplegable">
           <button onClick={manejarHistorial}>Historial</button>
 
           <button onClick={manejarCerrarSesion}>Cerrar sesión</button>

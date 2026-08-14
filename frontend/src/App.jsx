@@ -109,17 +109,19 @@ function App() {
       <div className="encabezado">
         <h1>FocusFlow</h1>
 
-        <div className="menu">
-          <Menu
-            mostrarHistorial={() => setMostrarHistorial(true)}
-            cerrarSesion={cerrarSesion}
-          />
-        </div>
+        <Menu
+          mostrarHistorial={() => setMostrarHistorial(true)}
+          cerrarSesion={cerrarSesion}
+        />
       </div>
 
-      <Temporizador actualizarDatos={actualizarDatos} />
+      <div className="seccion-temporizador">
+        <Temporizador actualizarDatos={actualizarDatos} />
+      </div>
 
-      <Estadisticas actualizar={actualizar} />
+      <div className="seccion-estadisticas">
+        <Estadisticas actualizar={actualizar} />
+      </div>
     </>
   );
 }

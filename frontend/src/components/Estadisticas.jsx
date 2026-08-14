@@ -35,8 +35,6 @@ function Estadisticas({ actualizar }) {
 
   return (
     <div className="estadisticas">
-      <h2 className="estadisticas-titulo">Estadísticas</h2>
-
       <div className="estadistica-hoy">
         <h3>Hoy</h3>
 

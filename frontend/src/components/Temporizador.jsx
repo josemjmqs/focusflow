@@ -294,7 +294,6 @@ function Temporizador({ actualizarDatos }) {
 
   return (
     <div>
-      <h2>Temporizador</h2>
       <h3>{modo === "trabajo" ? "🍅 Trabajo" : "☕ Descanso"}</h3>
       <h1>
         {tiempoTerminado
