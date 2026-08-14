@@ -23,6 +23,8 @@ function Temporizador({ actualizarDatos }) {
   const [duracionActual, setDuracionActual] = useState(0);
   const [tiempoAcumulado, setTiempoAcumulado] = useState(0);
   const [idSesion, setIdSesion] = useState(null);
+  const [iniciando, setIniciando] = useState(false);
+  const [terminando, setTerminando] = useState(false);
 
   // Configuración
   const [duracionSeleccionada, setDuracionSeleccionada] = useState(5);
@@ -128,23 +130,33 @@ function Temporizador({ actualizarDatos }) {
   }
 
   async function terminarSesionManual() {
-    setAlarmaActiva(false);
+    setTerminando(true);
 
-    await terminarTrabajo();
+    try {
+      setAlarmaActiva(false);
 
-    setActivo(false);
-    reiniciarEstadoTemporizador();
+      await terminarTrabajo();
+
+      setActivo(false);
+      reiniciarEstadoTemporizador();
+    } finally {
+      setTerminando(false);
+    }
   }
 
   // Manejo del temporizador
   async function iniciarTemporizador() {
     console.log("Iniciar temporizador");
 
+    setIniciando(true);
+
     try {
       setError("");
       await iniciarTrabajo();
     } catch (error) {
       setError(error.message);
+    } finally {
+      setIniciando(false);
     }
   }
 
@@ -314,7 +326,9 @@ function Temporizador({ actualizarDatos }) {
         <option value={2700}>45 minutos</option>
       </select>
       {!activo && !pausado && (
-        <button onClick={iniciarTemporizador}>Iniciar</button>
+        <button onClick={iniciarTemporizador} disabled={iniciando}>
+          {iniciando ? "Iniciando..." : "Iniciar"}
+        </button>
       )}
 
       {activo && <button onClick={pausarTemporizador}>⏸ Pausar</button>}
@@ -324,7 +338,9 @@ function Temporizador({ actualizarDatos }) {
       )}
 
       {idSesion && (
-        <button onClick={terminarSesionManual}>Terminar sesión</button>
+        <button onClick={terminarSesionManual} disabled={terminando}>
+          {terminando ? "Terminando..." : "Terminar sesión"}
+        </button>
       )}
 
       {error && (
