@@ -10,6 +10,7 @@ import {
   cancelarSesionEnProgreso,
   finalizarSesion,
 } from "./services/api";
+import "./App.css";
 
 function App() {
   const [actualizar, setActualizar] = useState(0);
@@ -105,12 +106,16 @@ function App() {
 
   return (
     <>
-      <h1>FocusFlow</h1>
+      <div className="encabezado">
+        <h1>FocusFlow</h1>
 
-      <Menu
-        mostrarHistorial={() => setMostrarHistorial(true)}
-        cerrarSesion={cerrarSesion}
-      />
+        <div className="menu">
+          <Menu
+            mostrarHistorial={() => setMostrarHistorial(true)}
+            cerrarSesion={cerrarSesion}
+          />
+        </div>
+      </div>
 
       <Temporizador actualizarDatos={actualizarDatos} />
 
