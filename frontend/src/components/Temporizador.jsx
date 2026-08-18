@@ -5,7 +5,7 @@ import "./Temporizador.css";
 function Temporizador({ actualizarDatos }) {
   // Temporizador
   const [tiempoRestante, setTiempoRestante] = useState(5);
-  const [tiempoExtra, setTiempoExtra] = useState(0);
+  const [inicioTiempoExtra, setInicioTiempoExtra] = useState(null);
   const contextoAudio = useRef(null);
   const oscilador = useRef(null);
   const ganancia = useRef(null);
@@ -23,6 +23,7 @@ function Temporizador({ actualizarDatos }) {
   const [inicioTemporizador, setInicioTemporizador] = useState(null);
   const [duracionActual, setDuracionActual] = useState(0);
   const [tiempoAcumulado, setTiempoAcumulado] = useState(0);
+  const [tiempoExtraAcumulado, setTiempoExtraAcumulado] = useState(0);
   const [idSesion, setIdSesion] = useState(null);
   const [iniciando, setIniciando] = useState(false);
   const [terminando, setTerminando] = useState(false);
@@ -61,9 +62,21 @@ function Temporizador({ actualizarDatos }) {
     );
   }
 
+  function calcularSegundosExtraTranscurridos() {
+    if (!inicioTiempoExtra) {
+      return tiempoExtraAcumulado;
+    }
+
+    return (
+      tiempoExtraAcumulado +
+      Math.floor((Date.now() - inicioTiempoExtra.getTime()) / 1000)
+    );
+  }
+
   function reiniciarEstadoTemporizador() {
     setTiempoTerminado(false);
-    setTiempoExtra(0);
+    setTiempoExtraAcumulado(0);
+    setInicioTiempoExtra(null);
     setAlarmaActiva(false);
   }
 
@@ -175,10 +188,15 @@ function Temporizador({ actualizarDatos }) {
   }
 
   function pausarTemporizador() {
-    const transcurrido = calcularSegundosTranscurridos();
+    if (tiempoTerminado) {
+      setTiempoExtraAcumulado(calcularSegundosExtraTranscurridos());
+      setInicioTiempoExtra(null);
+    } else {
+      const transcurrido = calcularSegundosTranscurridos();
 
-    setTiempoAcumulado(transcurrido);
-    setInicioTemporizador(null);
+      setTiempoAcumulado(transcurrido);
+      setInicioTemporizador(null);
+    }
 
     setActivo(false);
     setPausado(true);
@@ -186,7 +204,11 @@ function Temporizador({ actualizarDatos }) {
   }
 
   function reanudarTemporizador() {
-    setInicioTemporizador(new Date());
+    if (tiempoTerminado) {
+      setInicioTiempoExtra(new Date());
+    } else {
+      setInicioTemporizador(new Date());
+    }
 
     setActivo(true);
     setPausado(false);
@@ -240,6 +262,7 @@ function Temporizador({ actualizarDatos }) {
         setTiempoRestante(0);
         setTiempoTerminado(true);
         setAlarmaActiva(true);
+        setInicioTiempoExtra(new Date());
         return;
       }
 
@@ -252,16 +275,20 @@ function Temporizador({ actualizarDatos }) {
   }, [activo, tiempoTerminado, inicioTemporizador, duracionActual]);
 
   useEffect(() => {
-    if (!activo || !tiempoTerminado) {
+    if (!activo || !tiempoTerminado || !inicioTiempoExtra) {
       return;
     }
 
-    const intervalo = setInterval(() => {
-      setTiempoExtra((anterior) => anterior + 1);
-    }, 1000);
+    const actualizarTiempoExtra = () => {
+      setTiempoExtraAcumulado(calcularSegundosExtraTranscurridos());
+    };
+
+    actualizarTiempoExtra();
+
+    const intervalo = setInterval(actualizarTiempoExtra, 1000);
 
     return () => clearInterval(intervalo);
-  }, [activo, tiempoTerminado]);
+  }, [activo, tiempoTerminado, inicioTiempoExtra]);
 
   // Alarma
   useEffect(() => {
@@ -327,7 +354,7 @@ function Temporizador({ actualizarDatos }) {
         {tiempoTerminado ? (
           <div className="tiempo-extra">
             <span>Tiempo extra</span>
-            <h1>+{formatearTiempo(tiempoExtra)}</h1>
+            <h1>+{formatearTiempo(tiempoExtraAcumulado)}</h1>
           </div>
         ) : (
           <h1>{formatearTiempo(tiempoRestante)}</h1>
