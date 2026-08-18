@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { crearSesion, finalizarSesion } from "../services/api";
+import "./Temporizador.css";
 
 function Temporizador({ actualizarDatos }) {
   // Temporizador
@@ -35,6 +36,18 @@ function Temporizador({ actualizarDatos }) {
     const segundosRestantes = segundos % 60;
 
     return `${String(minutos).padStart(2, "0")}:${String(segundosRestantes).padStart(2, "0")}`;
+  }
+
+  function obtenerDuracionDescanso(duracionTrabajo) {
+    if (duracionTrabajo === 1500) {
+      return 300; // 5 minutos
+    }
+
+    if (duracionTrabajo === 5) {
+      return 3; // 3 segundos
+    }
+
+    return 0;
   }
 
   function calcularSegundosTranscurridos() {
@@ -133,12 +146,15 @@ function Temporizador({ actualizarDatos }) {
     setTerminando(true);
 
     try {
+      setError("");
       setAlarmaActiva(false);
 
       await terminarTrabajo();
 
       setActivo(false);
       reiniciarEstadoTemporizador();
+    } catch (error) {
+      setError(error.message);
     } finally {
       setTerminando(false);
     }
@@ -146,8 +162,6 @@ function Temporizador({ actualizarDatos }) {
 
   // Manejo del temporizador
   async function iniciarTemporizador() {
-    console.log("Iniciar temporizador");
-
     setIniciando(true);
 
     try {
@@ -168,6 +182,7 @@ function Temporizador({ actualizarDatos }) {
 
     setActivo(false);
     setPausado(true);
+    setAlarmaActiva(false);
   }
 
   function reanudarTemporizador() {
@@ -187,27 +202,28 @@ function Temporizador({ actualizarDatos }) {
   }
 
   async function iniciarDescanso() {
-    setAlarmaActiva(false);
+    setTerminando(true);
 
-    await terminarTrabajo();
+    try {
+      setAlarmaActiva(false);
 
-    const ahora = new Date();
+      await terminarTrabajo();
 
-    setModo("descanso");
-    setInicioTemporizador(ahora);
-    setDuracionActual(3);
-    setTiempoRestante(3);
+      const duracionDescanso = obtenerDuracionDescanso(duracionActual);
+      const ahora = new Date();
 
-    reiniciarEstadoTemporizador();
+      setModo("descanso");
+      setInicioTemporizador(ahora);
+      setDuracionActual(duracionDescanso);
+      setTiempoRestante(duracionDescanso);
 
-    setActivo(true);
-    setPausado(false);
-  }
+      reiniciarEstadoTemporizador();
 
-  async function empezarConcentracion() {
-    reiniciarEstadoTemporizador();
-
-    await iniciarTrabajo();
+      setActivo(true);
+      setPausado(false);
+    } finally {
+      setTerminando(false);
+    }
   }
 
   // Effects
@@ -285,20 +301,20 @@ function Temporizador({ actualizarDatos }) {
   const esTrabajo = modo === "trabajo";
 
   const tituloDialogo = esTrabajo
-    ? "Terminaste tu tiempo de concentración 🍅"
-    : "Terminaste tu descanso ☕";
+    ? "Terminaste tu tiempo de concentración 🧑‍💻"
+    : "Terminaste tu descanso 🧘";
 
   const textoBotonPrincipal = esTrabajo
-    ? "Iniciar descanso ☕"
-    : "Empezar concentración 🍅";
+    ? "Iniciar descanso 🧘"
+    : "Iniciar concentración 🧑‍💻";
 
   const accionBotonPrincipal = esTrabajo
     ? iniciarDescanso
-    : empezarConcentracion;
+    : iniciarTemporizador;
 
   const textoBotonSecundario = esTrabajo
-    ? "Seguir concentrado 💪"
-    : "Seguir descansando 😌";
+    ? "Seguir concentrado 🧑‍💻"
+    : "Seguir descansando 🧘";
 
   const accionBotonSecundario = esTrabajo
     ? seguirTrabajando
@@ -306,12 +322,17 @@ function Temporizador({ actualizarDatos }) {
 
   return (
     <div>
-      <h3>{modo === "trabajo" ? "🍅 Trabajo" : "☕ Descanso"}</h3>
-      <h1>
-        {tiempoTerminado
-          ? `+${formatearTiempo(tiempoExtra)}`
-          : formatearTiempo(tiempoRestante)}
-      </h1>
+      <h3>{modo === "trabajo" ? "🧑‍💻 Trabajo" : "🧘 Descanso"}</h3>
+      <div className="temporizador-tiempo">
+        {tiempoTerminado ? (
+          <div className="tiempo-extra">
+            <span>Tiempo extra</span>
+            <h1>+{formatearTiempo(tiempoExtra)}</h1>
+          </div>
+        ) : (
+          <h1>{formatearTiempo(tiempoRestante)}</h1>
+        )}
+      </div>
 
       <label htmlFor="duracion">Duración:</label>
 
@@ -361,7 +382,9 @@ function Temporizador({ actualizarDatos }) {
         <div>
           <h3>{tituloDialogo}</h3>
 
-          <button onClick={accionBotonPrincipal}>{textoBotonPrincipal}</button>
+          <button onClick={accionBotonPrincipal} disabled={terminando}>
+            {terminando && !esTrabajo ? "Procesando..." : textoBotonPrincipal}
+          </button>
 
           <button onClick={accionBotonSecundario}>
             {textoBotonSecundario}
