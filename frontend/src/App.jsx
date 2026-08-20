@@ -4,12 +4,7 @@ import Temporizador from "./components/Temporizador";
 import Login from "./components/Login";
 import Registro from "./components/Registro";
 import Menu from "./components/Menu";
-import { useState, useEffect } from "react";
-import {
-  obtenerSesionEnProgreso,
-  cancelarSesionEnProgreso,
-  finalizarSesion,
-} from "./services/api";
+import { useState } from "react";
 import "./App.css";
 
 function App() {
@@ -21,8 +16,6 @@ function App() {
     localStorage.getItem("token") !== null,
   );
 
-  const [sesionPendiente, setSesionPendiente] = useState(null);
-
   const [mostrarHistorial, setMostrarHistorial] = useState(false);
 
   const actualizarDatos = () => {
@@ -31,27 +24,6 @@ function App() {
 
   function manejarLogin() {
     setAutenticado(true);
-  }
-
-  useEffect(() => {
-    if (autenticado) {
-      obtenerSesionEnProgreso().then((sesion) => {
-        setSesionPendiente(sesion);
-      });
-    }
-  }, [autenticado]);
-
-  async function manejarCancelarSesion() {
-    await cancelarSesionEnProgreso(sesionPendiente.id);
-
-    setSesionPendiente(null);
-  }
-
-  async function manejarCompletarSesion() {
-    await finalizarSesion(sesionPendiente.id, 1500);
-
-    setSesionPendiente(null);
-    actualizarDatos();
   }
 
   function cerrarSesion() {
@@ -69,23 +41,6 @@ function App() {
         onLogin={manejarLogin}
         crearCuenta={() => setMostrarRegistro(true)}
       />
-    );
-  }
-
-  if (sesionPendiente) {
-    return (
-      <>
-        <h1>FocusFlow</h1>
-
-        <p>
-          Encontramos una sesión pendiente iniciada el:{" "}
-          {new Date(sesionPendiente.inicio).toLocaleString()}
-        </p>
-
-        <button onClick={manejarCompletarSesion}>Completar sesión</button>
-
-        <button onClick={manejarCancelarSesion}>Cancelar sesión</button>
-      </>
     );
   }
 

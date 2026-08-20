@@ -24,13 +24,14 @@ export const obtenerSesiones = async (req, res) => {
 
 export const crearSesion = async (req, res) => {
   const usuarioId = req.usuario.id;
+  const { duracionObjetivo } = req.body;
 
   try {
     const resultado = await pool.query(
       `SELECT *
-      FROM sesiones
-      WHERE usuario_id = $1
-      AND estado = $2`,
+       FROM sesiones
+       WHERE usuario_id = $1
+       AND estado = $2`,
       [usuarioId, "en_progreso"],
     );
 
@@ -47,11 +48,12 @@ export const crearSesion = async (req, res) => {
       `INSERT INTO sesiones (
         usuario_id,
         inicio,
-        estado
+        estado,
+        duracion_objetivo
       )
-      VALUES ($1, $2, $3)
+      VALUES ($1, $2, $3, $4)
       RETURNING *`,
-      [usuarioId, inicio, estado],
+      [usuarioId, inicio, estado, duracionObjetivo],
     );
 
     res.status(201).json(nuevaSesion.rows[0]);

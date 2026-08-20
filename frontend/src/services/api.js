@@ -46,13 +46,16 @@ export const obtenerSesiones = async () => {
   });
 };
 
-export const crearSesion = async () => {
+export const crearSesion = async (duracionObjetivo) => {
   return realizarPeticion(`${API_URL}/sesiones`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${obtenerToken()}`,
     },
+    body: JSON.stringify({
+      duracionObjetivo,
+    }),
   });
 };
 

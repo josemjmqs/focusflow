@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { crearSesion, finalizarSesion } from "../services/api";
+import {
+  crearSesion,
+  finalizarSesion,
+  obtenerSesionEnProgreso,
+} from "../services/api";
 import "./Temporizador.css";
 
 function Temporizador({ actualizarDatos }) {
@@ -73,6 +77,13 @@ function Temporizador({ actualizarDatos }) {
     );
   }
 
+  function terminarTemporizador(momentoFinalizacion) {
+    setTiempoRestante(0);
+    setTiempoTerminado(true);
+    setAlarmaActiva(true);
+    setInicioTiempoExtra(momentoFinalizacion);
+  }
+
   function reiniciarEstadoTemporizador() {
     setTiempoTerminado(false);
     setTiempoExtraAcumulado(0);
@@ -119,7 +130,7 @@ function Temporizador({ actualizarDatos }) {
   async function iniciarTrabajo() {
     const fechaInicio = new Date();
 
-    const sesion = await crearSesion();
+    const sesion = await crearSesion(duracionSeleccionada);
 
     setIdSesion(sesion.id);
 
@@ -179,8 +190,26 @@ function Temporizador({ actualizarDatos }) {
 
     try {
       setError("");
+
       await iniciarTrabajo();
     } catch (error) {
+      if (error.message === "Ya existe una sesión en progreso") {
+        try {
+          const sesion = await obtenerSesionEnProgreso();
+
+          if (!sesion) {
+            setError("No se encontró la sesión en progreso.");
+            return;
+          }
+
+          setSesionEnProgreso(sesion);
+        } catch (error) {
+          setError(error.message);
+        }
+
+        return;
+      }
+
       setError(error.message);
     } finally {
       setIniciando(false);
@@ -189,7 +218,9 @@ function Temporizador({ actualizarDatos }) {
 
   function pausarTemporizador() {
     if (tiempoTerminado) {
-      setTiempoExtraAcumulado(calcularSegundosExtraTranscurridos());
+      const transcurrido = calcularSegundosExtraTranscurridos();
+
+      setTiempoExtraAcumulado(transcurrido);
       setInicioTiempoExtra(null);
     } else {
       const transcurrido = calcularSegundosTranscurridos();
@@ -259,10 +290,11 @@ function Temporizador({ actualizarDatos }) {
       const restante = duracionActual - transcurrido;
 
       if (restante <= 0) {
-        setTiempoRestante(0);
-        setTiempoTerminado(true);
-        setAlarmaActiva(true);
-        setInicioTiempoExtra(new Date());
+        const exceso = transcurrido - duracionActual;
+
+        const momentoFinalizacion = new Date(Date.now() - exceso * 1000);
+
+        terminarTemporizador(momentoFinalizacion);
         return;
       }
 
@@ -290,6 +322,57 @@ function Temporizador({ actualizarDatos }) {
     return () => clearInterval(intervalo);
   }, [activo, tiempoTerminado, inicioTiempoExtra]);
 
+  useEffect(() => {
+    async function recuperarSesion() {
+      try {
+        const sesion = await obtenerSesionEnProgreso();
+
+        if (!sesion) {
+          return;
+        }
+
+        const inicio = new Date(sesion.inicio);
+        const duracion = sesion.duracion_objetivo;
+
+        setIdSesion(sesion.id);
+        setInicioSesion(inicio);
+        setInicioTemporizador(inicio);
+        setTiempoAcumulado(0);
+        setDuracionActual(duracion);
+        setModo("trabajo");
+        setTiempoTerminado(false);
+        setTiempoExtraAcumulado(0);
+        setAlarmaActiva(false);
+        setPausado(false);
+        setActivo(true);
+
+        const transcurrido = Math.floor((Date.now() - inicio.getTime()) / 1000);
+
+        const restante = duracion - transcurrido;
+
+        if (restante <= 0) {
+          setTiempoRestante(0);
+          setTiempoTerminado(true);
+          setAlarmaActiva(true);
+
+          const momentoFinalizacion = new Date(
+            inicio.getTime() + duracion * 1000,
+          );
+
+          setInicioTiempoExtra(momentoFinalizacion);
+
+          return;
+        }
+
+        setTiempoRestante(restante);
+      } catch (error) {
+        setError(error.message);
+      }
+    }
+
+    recuperarSesion();
+  }, []);
+
   // Alarma
   useEffect(() => {
     if (alarmaActiva) {
@@ -301,7 +384,16 @@ function Temporizador({ actualizarDatos }) {
 
   useEffect(() => {
     function actualizarAlVolver() {
-      if (!activo || !inicioTemporizador || tiempoTerminado) {
+      if (!activo) {
+        return;
+      }
+
+      if (tiempoTerminado && inicioTiempoExtra) {
+        setTiempoExtraAcumulado(calcularSegundosExtraTranscurridos());
+        return;
+      }
+
+      if (!inicioTemporizador || tiempoTerminado) {
         return;
       }
 
@@ -309,9 +401,7 @@ function Temporizador({ actualizarDatos }) {
       const restante = duracionActual - transcurrido;
 
       if (restante <= 0) {
-        setTiempoRestante(0);
-        setTiempoTerminado(true);
-        setAlarmaActiva(true);
+        terminarTemporizador();
         return;
       }
 
@@ -323,7 +413,13 @@ function Temporizador({ actualizarDatos }) {
     return () => {
       document.removeEventListener("visibilitychange", actualizarAlVolver);
     };
-  }, [activo, inicioTemporizador, tiempoTerminado, duracionActual]);
+  }, [
+    activo,
+    inicioTemporizador,
+    inicioTiempoExtra,
+    tiempoTerminado,
+    duracionActual,
+  ]);
 
   const esTrabajo = modo === "trabajo";
 
