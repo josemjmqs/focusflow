@@ -35,7 +35,6 @@ function Temporizador({ actualizar, actualizarDatos }) {
   const [idSesion, setIdSesion] = useState(null);
   const [iniciando, setIniciando] = useState(false);
   const [terminando, setTerminando] = useState(false);
-  const [sesionEnProgreso, setSesionEnProgreso] = useState(null);
   const [sesionesCompletadasCiclo, setSesionesCompletadasCiclo] = useState(
     () => {
       const guardadas = localStorage.getItem("sesionesCompletadasCiclo");
@@ -50,6 +49,14 @@ function Temporizador({ actualizar, actualizarDatos }) {
     const segundosRestantes = segundos % 60;
 
     return `${String(minutos).padStart(2, "0")}:${String(segundosRestantes).padStart(2, "0")}`;
+  }
+
+  function mostrarNotificacion(titulo, mensaje) {
+    if (Notification.permission === "granted") {
+      new Notification(titulo, {
+        body: mensaje,
+      });
+    }
   }
 
   function obtenerConfiguracionPomodoro() {
@@ -94,6 +101,10 @@ function Temporizador({ actualizar, actualizarDatos }) {
     setTiempoTerminado(true);
     setAlarmaActiva(true);
     setInicioTiempoExtra(momentoFinalizacion);
+
+    if (document.hidden) {
+      mostrarNotificacion("FocusFlow", "Terminó tu tiempo de concentración 🧑‍💻");
+    }
   }
 
   function reiniciarEstadoTemporizador() {
@@ -218,7 +229,33 @@ function Temporizador({ actualizar, actualizarDatos }) {
             return;
           }
 
-          setSesionEnProgreso(sesion);
+          const inicio = new Date(sesion.inicio);
+          const duracion = sesion.duracion_objetivo;
+
+          setIdSesion(sesion.id);
+          setInicioSesion(inicio);
+          setInicioTemporizador(inicio);
+          setTiempoAcumulado(0);
+          setDuracionActual(duracion);
+          setModo("trabajo");
+          setPausado(false);
+          setActivo(true);
+
+          const transcurrido = Math.floor(
+            (Date.now() - inicio.getTime()) / 1000,
+          );
+
+          const restante = duracion - transcurrido;
+
+          if (restante <= 0) {
+            const momentoFinalizacion = new Date(
+              inicio.getTime() + duracion * 1000,
+            );
+
+            terminarTemporizador(momentoFinalizacion);
+          } else {
+            setTiempoRestante(restante);
+          }
         } catch (error) {
           setError(error.message);
         }
@@ -413,6 +450,12 @@ function Temporizador({ actualizar, actualizarDatos }) {
     }
 
     recuperarSesion();
+  }, []);
+
+  useEffect(() => {
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
   }, []);
 
   // Alarma
