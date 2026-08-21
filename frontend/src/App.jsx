@@ -4,6 +4,7 @@ import Temporizador from "./components/Temporizador";
 import Login from "./components/Login";
 import Registro from "./components/Registro";
 import Menu from "./components/Menu";
+import ConfiguracionPomodoro from "./components/ConfiguracionPomodoro";
 import { useState } from "react";
 import "./App.css";
 
@@ -15,6 +16,8 @@ function App() {
   const [autenticado, setAutenticado] = useState(
     localStorage.getItem("token") !== null,
   );
+
+  const [mostrarConfiguracion, setMostrarConfiguracion] = useState(false);
 
   const [mostrarHistorial, setMostrarHistorial] = useState(false);
 
@@ -44,6 +47,17 @@ function App() {
     );
   }
 
+  if (mostrarConfiguracion) {
+    return (
+      <ConfiguracionPomodoro
+        volver={() => {
+          setMostrarConfiguracion(false);
+          actualizarDatos();
+        }}
+      />
+    );
+  }
+
   if (mostrarHistorial) {
     return (
       <>
@@ -66,12 +80,16 @@ function App() {
 
         <Menu
           mostrarHistorial={() => setMostrarHistorial(true)}
+          mostrarConfiguracion={() => setMostrarConfiguracion(true)}
           cerrarSesion={cerrarSesion}
         />
       </div>
 
       <div className="seccion-temporizador">
-        <Temporizador actualizarDatos={actualizarDatos} />
+        <Temporizador
+          actualizar={actualizar}
+          actualizarDatos={actualizarDatos}
+        />
       </div>
 
       <div className="seccion-estadisticas">

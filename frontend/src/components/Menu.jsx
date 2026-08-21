@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function Menu({ mostrarHistorial, cerrarSesion }) {
+function Menu({ mostrarHistorial, mostrarConfiguracion, cerrarSesion }) {
   const [abierto, setAbierto] = useState(false);
 
   function manejarHistorial() {
@@ -26,7 +26,7 @@ function Menu({ mostrarHistorial, cerrarSesion }) {
       {abierto && (
         <div className="menu-desplegable">
           <button onClick={manejarHistorial}>Historial</button>
-
+          <button onClick={mostrarConfiguracion}>Configuración Pomodoro</button>
           <button onClick={manejarCerrarSesion}>Cerrar sesión</button>
         </div>
       )}

@@ -6,9 +6,13 @@ import {
 } from "../services/api";
 import "./Temporizador.css";
 
-function Temporizador({ actualizarDatos }) {
+function Temporizador({ actualizar, actualizarDatos }) {
   // Temporizador
-  const [tiempoRestante, setTiempoRestante] = useState(5);
+  const [tiempoRestante, setTiempoRestante] = useState(() => {
+    const duracionTrabajo = Number(localStorage.getItem("duracionTrabajo"));
+
+    return duracionTrabajo ? duracionTrabajo * 60 : 25 * 60;
+  });
   const [inicioTiempoExtra, setInicioTiempoExtra] = useState(null);
   const contextoAudio = useRef(null);
   const oscilador = useRef(null);
@@ -31,25 +35,14 @@ function Temporizador({ actualizarDatos }) {
   const [idSesion, setIdSesion] = useState(null);
   const [iniciando, setIniciando] = useState(false);
   const [terminando, setTerminando] = useState(false);
+  const [sesionEnProgreso, setSesionEnProgreso] = useState(null);
+  const [sesionesCompletadasCiclo, setSesionesCompletadasCiclo] = useState(
+    () => {
+      const guardadas = localStorage.getItem("sesionesCompletadasCiclo");
 
-  // Configuración
-  const [duracionTrabajo, setDuracionTrabajo] = useState(() => {
-    const guardada = localStorage.getItem("duracionTrabajo");
-
-    return guardada ? Number(guardada) : 25;
-  });
-
-  const [duracionDescansoCorto, setDuracionDescansoCorto] = useState(() => {
-    const guardada = localStorage.getItem("duracionDescansoCorto");
-
-    return guardada ? Number(guardada) : 5;
-  });
-
-  const [duracionDescansoLargo, setDuracionDescansoLargo] = useState(() => {
-    const guardada = localStorage.getItem("duracionDescansoLargo");
-
-    return guardada ? Number(guardada) : 15;
-  });
+      return guardadas ? Number(guardadas) : 0;
+    },
+  );
 
   // Funciones auxiliares
   function formatearTiempo(segundos) {
@@ -59,8 +52,19 @@ function Temporizador({ actualizarDatos }) {
     return `${String(minutos).padStart(2, "0")}:${String(segundosRestantes).padStart(2, "0")}`;
   }
 
-  function obtenerDuracionDescanso() {
-    return duracionDescansoCorto * 60;
+  function obtenerConfiguracionPomodoro() {
+    return {
+      duracionTrabajo: Number(localStorage.getItem("duracionTrabajo")) || 25,
+
+      duracionDescansoCorto:
+        Number(localStorage.getItem("duracionDescansoCorto")) || 5,
+
+      duracionDescansoLargo:
+        Number(localStorage.getItem("duracionDescansoLargo")) || 15,
+
+      sesionesAntesDescansoLargo:
+        Number(localStorage.getItem("sesionesAntesDescansoLargo")) || 4,
+    };
   }
 
   function calcularSegundosTranscurridos() {
@@ -97,27 +101,6 @@ function Temporizador({ actualizarDatos }) {
     setTiempoExtraAcumulado(0);
     setInicioTiempoExtra(null);
     setAlarmaActiva(false);
-  }
-
-  function cambiarDuracionTrabajo(valor) {
-    const duracion = Number(valor);
-
-    setDuracionTrabajo(duracion);
-    localStorage.setItem("duracionTrabajo", duracion);
-  }
-
-  function cambiarDuracionDescansoCorto(valor) {
-    const duracion = Number(valor);
-
-    setDuracionDescansoCorto(duracion);
-    localStorage.setItem("duracionDescansoCorto", duracion);
-  }
-
-  function cambiarDuracionDescansoLargo(valor) {
-    const duracion = Number(valor);
-
-    setDuracionDescansoLargo(duracion);
-    localStorage.setItem("duracionDescansoLargo", duracion);
   }
 
   function reproducirAlarma() {
@@ -159,7 +142,9 @@ function Temporizador({ actualizarDatos }) {
   async function iniciarTrabajo() {
     const fechaInicio = new Date();
 
-    const duracion = duracionTrabajo * 60;
+    const configuracion = obtenerConfiguracionPomodoro();
+
+    const duracion = configuracion.duracionTrabajo * 60;
 
     const sesion = await crearSesion(duracion);
 
@@ -289,11 +274,35 @@ function Temporizador({ actualizarDatos }) {
     setTerminando(true);
 
     try {
+      setError("");
       setAlarmaActiva(false);
 
       await terminarTrabajo();
 
-      const duracionDescanso = obtenerDuracionDescanso(duracionActual);
+      const configuracion = obtenerConfiguracionPomodoro();
+
+      const nuevasSesionesCompletadas = sesionesCompletadasCiclo + 1;
+
+      const esDescansoLargo =
+        nuevasSesionesCompletadas >= configuracion.sesionesAntesDescansoLargo;
+
+      if (esDescansoLargo) {
+        setSesionesCompletadasCiclo(0);
+
+        localStorage.setItem("sesionesCompletadasCiclo", "0");
+      } else {
+        setSesionesCompletadasCiclo(nuevasSesionesCompletadas);
+
+        localStorage.setItem(
+          "sesionesCompletadasCiclo",
+          String(nuevasSesionesCompletadas),
+        );
+      }
+
+      const duracionDescanso = esDescansoLargo
+        ? configuracion.duracionDescansoLargo * 60
+        : configuracion.duracionDescansoCorto * 60;
+
       const ahora = new Date();
 
       setModo("descanso");
@@ -305,6 +314,8 @@ function Temporizador({ actualizarDatos }) {
 
       setActivo(true);
       setPausado(false);
+    } catch (error) {
+      setError(error.message);
     } finally {
       setTerminando(false);
     }
@@ -452,6 +463,18 @@ function Temporizador({ actualizarDatos }) {
     duracionActual,
   ]);
 
+  useEffect(() => {
+    if (activo || pausado || tiempoTerminado) {
+      return;
+    }
+
+    const duracionTrabajo = Number(localStorage.getItem("duracionTrabajo"));
+
+    const duracion = duracionTrabajo ? duracionTrabajo * 60 : 25 * 60;
+
+    setTiempoRestante(duracion);
+  }, [actualizar, activo, pausado, tiempoTerminado]);
+
   const esTrabajo = modo === "trabajo";
 
   const tituloDialogo = esTrabajo
@@ -488,46 +511,6 @@ function Temporizador({ actualizarDatos }) {
         )}
       </div>
 
-      <label htmlFor="duracionTrabajo">Tiempo de concentración:</label>
-
-      <input
-        id="duracionTrabajo"
-        type="number"
-        min="1"
-        max="180"
-        value={duracionTrabajo}
-        onChange={(e) => cambiarDuracionTrabajo(e.target.value)}
-        disabled={activo}
-      />
-
-      <span>minutos</span>
-      <label htmlFor="duracionDescansoCorto">Descanso corto:</label>
-
-      <input
-        id="duracionDescansoCorto"
-        type="number"
-        min="1"
-        max="60"
-        value={duracionDescansoCorto}
-        onChange={(e) => cambiarDuracionDescansoCorto(e.target.value)}
-        disabled={activo}
-      />
-
-      <span>minutos</span>
-
-      <label htmlFor="duracionDescansoLargo">Descanso largo:</label>
-
-      <input
-        id="duracionDescansoLargo"
-        type="number"
-        min="1"
-        max="60"
-        value={duracionDescansoLargo}
-        onChange={(e) => cambiarDuracionDescansoLargo(e.target.value)}
-        disabled={activo}
-      />
-
-      <span>minutos</span>
       {!activo && !pausado && (
         <button onClick={iniciarTemporizador} disabled={iniciando}>
           {iniciando ? "Iniciando..." : "Iniciar"}
