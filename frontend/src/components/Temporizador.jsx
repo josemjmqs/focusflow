@@ -6,7 +6,7 @@ import {
 } from "../services/api";
 import "./Temporizador.css";
 
-function Temporizador({ actualizar, actualizarDatos }) {
+function Temporizador({ actualizarDatos }) {
   // Temporizador
   const [tiempoRestante, setTiempoRestante] = useState(() => {
     const duracionTrabajo = Number(localStorage.getItem("duracionTrabajo"));
@@ -14,6 +14,7 @@ function Temporizador({ actualizar, actualizarDatos }) {
     return duracionTrabajo ? duracionTrabajo * 60 : 25 * 60;
   });
   const [inicioTiempoExtra, setInicioTiempoExtra] = useState(null);
+  const activoRef = useRef(false);
   const contextoAudio = useRef(null);
   const oscilador = useRef(null);
   const ganancia = useRef(null);
@@ -34,6 +35,7 @@ function Temporizador({ actualizar, actualizarDatos }) {
   const [tiempoExtraAcumulado, setTiempoExtraAcumulado] = useState(0);
   const [idSesion, setIdSesion] = useState(null);
   const [iniciando, setIniciando] = useState(false);
+  const [iniciandoDescanso, setIniciandoDescanso] = useState(false);
   const [terminando, setTerminando] = useState(false);
   const [sesionesCompletadasCiclo, setSesionesCompletadasCiclo] = useState(
     () => {
@@ -74,6 +76,30 @@ function Temporizador({ actualizar, actualizarDatos }) {
     };
   }
 
+  function guardarEstadoDescanso() {
+    localStorage.setItem(
+      "estadoDescanso",
+      JSON.stringify({
+        inicioTemporizador: inicioTemporizador
+          ? inicioTemporizador.toISOString()
+          : null,
+        duracionActual,
+        tiempoAcumulado,
+        activo,
+        pausado,
+        tiempoTerminado,
+        inicioTiempoExtra: inicioTiempoExtra
+          ? inicioTiempoExtra.toISOString()
+          : null,
+        tiempoExtraAcumulado,
+      }),
+    );
+  }
+
+  function borrarEstadoDescanso() {
+    localStorage.removeItem("estadoDescanso");
+  }
+
   function calcularSegundosTranscurridos() {
     if (!inicioTemporizador) {
       return tiempoAcumulado;
@@ -102,8 +128,31 @@ function Temporizador({ actualizar, actualizarDatos }) {
     setAlarmaActiva(true);
     setInicioTiempoExtra(momentoFinalizacion);
 
+    if (modo === "descanso") {
+      localStorage.setItem(
+        "estadoDescanso",
+        JSON.stringify({
+          inicioTemporizador: inicioTemporizador
+            ? inicioTemporizador.toISOString()
+            : null,
+          duracionActual,
+          tiempoAcumulado,
+          activo: true,
+          pausado: false,
+          tiempoTerminado: true,
+          inicioTiempoExtra: momentoFinalizacion.toISOString(),
+          tiempoExtraAcumulado: 0,
+        }),
+      );
+    }
+
     if (document.hidden) {
-      mostrarNotificacion("FocusFlow", "Terminó tu tiempo de concentración 🧑‍💻");
+      mostrarNotificacion(
+        "FocusFlow",
+        modo === "trabajo"
+          ? "Terminó tu tiempo de concentración 🧑‍💻"
+          : "Terminó tu descanso 🧘",
+      );
     }
   }
 
@@ -159,6 +208,9 @@ function Temporizador({ actualizar, actualizarDatos }) {
 
     const sesion = await crearSesion(duracion);
 
+    borrarEstadoDescanso();
+    localStorage.removeItem("modoTemporizador");
+
     setIdSesion(sesion.id);
 
     setInicioSesion(fechaInicio);
@@ -172,18 +224,24 @@ function Temporizador({ actualizar, actualizarDatos }) {
     reiniciarEstadoTemporizador();
 
     setActivo(true);
+    activoRef.current = true;
     setPausado(false);
   }
 
   async function terminarTrabajo() {
+    console.log("terminarTrabajo");
+    console.log("idSesion:", idSesion);
+    console.log("inicioSesion:", inicioSesion);
     if (!idSesion || !inicioSesion) {
+      console.log("No se puede terminar la sesión");
       return;
     }
 
     const duracion = calcularSegundosTranscurridos();
-
+    console.log("Duración:", duracion);
+    console.log("Finalizando sesión...");
     await finalizarSesion(idSesion, duracion);
-
+    console.log("Sesión finalizada correctamente");
     setInicioSesion(null);
     setInicioTemporizador(null);
     setTiempoAcumulado(0);
@@ -191,6 +249,7 @@ function Temporizador({ actualizar, actualizarDatos }) {
     setIdSesion(null);
 
     actualizarDatos();
+    console.log("terminarTrabajo terminado");
   }
 
   async function terminarSesionManual() {
@@ -203,6 +262,7 @@ function Temporizador({ actualizar, actualizarDatos }) {
       await terminarTrabajo();
 
       setActivo(false);
+      activoRef.current = false;
       reiniciarEstadoTemporizador();
     } catch (error) {
       setError(error.message);
@@ -270,16 +330,63 @@ function Temporizador({ actualizar, actualizarDatos }) {
   }
 
   function pausarTemporizador() {
+    activoRef.current = false;
+
     if (tiempoTerminado) {
       const transcurrido = calcularSegundosExtraTranscurridos();
 
       setTiempoExtraAcumulado(transcurrido);
       setInicioTiempoExtra(null);
+
+      if (modo === "descanso") {
+        localStorage.setItem(
+          "estadoDescanso",
+          JSON.stringify({
+            inicioTemporizador: inicioTemporizador
+              ? inicioTemporizador.toISOString()
+              : null,
+            duracionActual,
+            tiempoAcumulado,
+            activo: false,
+            pausado: true,
+            tiempoTerminado: true,
+            inicioTiempoExtra: null,
+            tiempoExtraAcumulado: transcurrido,
+          }),
+        );
+      }
     } else {
       const transcurrido = calcularSegundosTranscurridos();
 
       setTiempoAcumulado(transcurrido);
       setInicioTemporizador(null);
+
+      if (modo === "trabajo") {
+        localStorage.setItem(
+          "estadoTrabajo",
+          JSON.stringify({
+            pausado: true,
+            tiempoAcumulado: transcurrido,
+            duracionActual,
+          }),
+        );
+      }
+
+      if (modo === "descanso") {
+        localStorage.setItem(
+          "estadoDescanso",
+          JSON.stringify({
+            inicioTemporizador: null,
+            duracionActual,
+            tiempoAcumulado: transcurrido,
+            activo: false,
+            pausado: true,
+            tiempoTerminado: false,
+            inicioTiempoExtra: null,
+            tiempoExtraAcumulado: 0,
+          }),
+        );
+      }
     }
 
     setActivo(false);
@@ -288,12 +395,51 @@ function Temporizador({ actualizar, actualizarDatos }) {
   }
 
   function reanudarTemporizador() {
+    const ahora = new Date();
+
     if (tiempoTerminado) {
-      setInicioTiempoExtra(new Date());
+      setInicioTiempoExtra(ahora);
+
+      if (modo === "descanso") {
+        localStorage.setItem(
+          "estadoDescanso",
+          JSON.stringify({
+            inicioTemporizador: null,
+            duracionActual,
+            tiempoAcumulado,
+            activo: true,
+            pausado: false,
+            tiempoTerminado: true,
+            inicioTiempoExtra: ahora.toISOString(),
+            tiempoExtraAcumulado,
+          }),
+        );
+      }
     } else {
-      setInicioTemporizador(new Date());
+      setInicioTemporizador(ahora);
+
+      if (modo === "trabajo") {
+        localStorage.removeItem("estadoTrabajo");
+      }
+
+      if (modo === "descanso") {
+        localStorage.setItem(
+          "estadoDescanso",
+          JSON.stringify({
+            inicioTemporizador: ahora.toISOString(),
+            duracionActual,
+            tiempoAcumulado,
+            activo: true,
+            pausado: false,
+            tiempoTerminado: false,
+            inicioTiempoExtra: null,
+            tiempoExtraAcumulado: 0,
+          }),
+        );
+      }
     }
 
+    activoRef.current = true;
     setActivo(true);
     setPausado(false);
   }
@@ -308,14 +454,30 @@ function Temporizador({ actualizar, actualizarDatos }) {
   }
 
   async function iniciarDescanso() {
-    setTerminando(true);
+    console.log("=== INICIANDO DESCANSO ===");
+
+    setIniciandoDescanso(true);
+    setError("");
+    setAlarmaActiva(false);
 
     try {
-      setError("");
-      setAlarmaActiva(false);
+      const duracion = calcularSegundosTranscurridos();
 
-      await terminarTrabajo();
+      console.log("Duración trabajo:", duracion);
+      console.log("Finalizando sesión:", idSesion);
 
+      await finalizarSesion(idSesion, duracion);
+
+      console.log("Sesión finalizada");
+
+      // Limpiar sesión anterior
+      setInicioSesion(null);
+      setInicioTemporizador(null);
+      setTiempoAcumulado(0);
+      setDuracionActual(0);
+      setIdSesion(null);
+
+      // Calcular qué descanso corresponde
       const configuracion = obtenerConfiguracionPomodoro();
 
       const nuevasSesionesCompletadas = sesionesCompletadasCiclo + 1;
@@ -325,11 +487,9 @@ function Temporizador({ actualizar, actualizarDatos }) {
 
       if (esDescansoLargo) {
         setSesionesCompletadasCiclo(0);
-
         localStorage.setItem("sesionesCompletadasCiclo", "0");
       } else {
         setSesionesCompletadasCiclo(nuevasSesionesCompletadas);
-
         localStorage.setItem(
           "sesionesCompletadasCiclo",
           String(nuevasSesionesCompletadas),
@@ -342,19 +502,45 @@ function Temporizador({ actualizar, actualizarDatos }) {
 
       const ahora = new Date();
 
+      console.log("Duración descanso:", duracionDescanso);
+      console.log("Iniciando descanso a:", ahora);
+
       setModo("descanso");
+      setTiempoTerminado(false);
+      setTiempoExtraAcumulado(0);
+      setInicioTiempoExtra(null);
+      setAlarmaActiva(false);
+
       setInicioTemporizador(ahora);
+      setTiempoAcumulado(0);
       setDuracionActual(duracionDescanso);
       setTiempoRestante(duracionDescanso);
 
-      reiniciarEstadoTemporizador();
-
-      setActivo(true);
       setPausado(false);
+      setActivo(true);
+      activoRef.current = true;
+      localStorage.setItem(
+        "estadoDescanso",
+        JSON.stringify({
+          inicioTemporizador: ahora.toISOString(),
+          duracionActual: duracionDescanso,
+          tiempoAcumulado: 0,
+          activo: true,
+          pausado: false,
+          tiempoTerminado: false,
+          inicioTiempoExtra: null,
+          tiempoExtraAcumulado: 0,
+        }),
+      );
+
+      localStorage.setItem("modoTemporizador", "descanso");
+
+      console.log("=== DESCANSO INICIADO ===");
     } catch (error) {
+      console.error("Error iniciando descanso:", error);
       setError(error.message);
     } finally {
-      setTerminando(false);
+      setIniciandoDescanso(false);
     }
   }
 
@@ -365,6 +551,9 @@ function Temporizador({ actualizar, actualizarDatos }) {
     }
 
     const intervalo = setInterval(() => {
+      if (!activoRef.current) {
+        return;
+      }
       const transcurrido = calcularSegundosTranscurridos();
       const restante = duracionActual - transcurrido;
 
@@ -404,6 +593,151 @@ function Temporizador({ actualizar, actualizarDatos }) {
   useEffect(() => {
     async function recuperarSesion() {
       try {
+        // --------------------------------------------------
+        // 1. RECUPERAR DESCANSO
+        // --------------------------------------------------
+
+        const estadoDescansoGuardado = localStorage.getItem("estadoDescanso");
+
+        if (estadoDescansoGuardado) {
+          const estado = JSON.parse(estadoDescansoGuardado);
+
+          const inicio = estado.inicioTemporizador
+            ? new Date(estado.inicioTemporizador)
+            : null;
+
+          const inicioExtra = estado.inicioTiempoExtra
+            ? new Date(estado.inicioTiempoExtra)
+            : null;
+
+          setModo("descanso");
+          setDuracionActual(estado.duracionActual);
+          setTiempoAcumulado(estado.tiempoAcumulado || 0);
+          setTiempoExtraAcumulado(estado.tiempoExtraAcumulado || 0);
+          setPausado(estado.pausado);
+          setActivo(estado.activo);
+          setTiempoTerminado(estado.tiempoTerminado);
+          setInicioTemporizador(inicio);
+          setInicioTiempoExtra(inicioExtra);
+          setAlarmaActiva(false);
+
+          activoRef.current = estado.activo;
+
+          // Descanso pausado
+          if (estado.pausado) {
+            if (estado.tiempoTerminado) {
+              setTiempoRestante(0);
+            } else {
+              setTiempoRestante(
+                Math.max(
+                  estado.duracionActual - (estado.tiempoAcumulado || 0),
+                  0,
+                ),
+              );
+            }
+
+            return;
+          }
+
+          // Descanso terminado, con tiempo extra
+          if (estado.tiempoTerminado && inicioExtra) {
+            const tiempoExtra =
+              (estado.tiempoExtraAcumulado || 0) +
+              Math.floor((Date.now() - inicioExtra.getTime()) / 1000);
+
+            setTiempoExtraAcumulado(tiempoExtra);
+
+            if (estado.activo) {
+              setAlarmaActiva(true);
+            }
+
+            return;
+          }
+
+          // Descanso activo
+          if (inicio) {
+            const transcurrido =
+              (estado.tiempoAcumulado || 0) +
+              Math.floor((Date.now() - inicio.getTime()) / 1000);
+
+            const restante = estado.duracionActual - transcurrido;
+
+            if (restante <= 0) {
+              const momentoFinalizacion = new Date(
+                inicio.getTime() +
+                  (estado.duracionActual - (estado.tiempoAcumulado || 0)) *
+                    1000,
+              );
+
+              setTiempoRestante(0);
+              setTiempoTerminado(true);
+              setAlarmaActiva(true);
+              setInicioTiempoExtra(momentoFinalizacion);
+
+              localStorage.setItem(
+                "estadoDescanso",
+                JSON.stringify({
+                  ...estado,
+                  tiempoTerminado: true,
+                  inicioTiempoExtra: momentoFinalizacion.toISOString(),
+                  tiempoExtraAcumulado: 0,
+                }),
+              );
+
+              return;
+            }
+
+            setTiempoRestante(restante);
+          }
+
+          return;
+        }
+
+        // --------------------------------------------------
+        // 2. RECUPERAR TRABAJO PAUSADO
+        // --------------------------------------------------
+
+        const estadoTrabajoGuardado = localStorage.getItem("estadoTrabajo");
+
+        if (estadoTrabajoGuardado) {
+          const estadoTrabajo = JSON.parse(estadoTrabajoGuardado);
+
+          const sesion = await obtenerSesionEnProgreso();
+
+          if (!sesion) {
+            localStorage.removeItem("estadoTrabajo");
+            return;
+          }
+
+          setIdSesion(sesion.id);
+          setInicioSesion(new Date(sesion.inicio));
+          setInicioTemporizador(null);
+          setTiempoAcumulado(estadoTrabajo.tiempoAcumulado || 0);
+          setDuracionActual(estadoTrabajo.duracionActual);
+          setModo("trabajo");
+          setTiempoTerminado(false);
+          setTiempoExtraAcumulado(0);
+          setAlarmaActiva(false);
+          setPausado(true);
+          setActivo(false);
+
+          activoRef.current = false;
+
+          setTiempoRestante(
+            Math.max(
+              estadoTrabajo.duracionActual -
+                (estadoTrabajo.tiempoAcumulado || 0),
+              0,
+            ),
+          );
+
+          return;
+        }
+
+        // --------------------------------------------------
+        // 3. RECUPERAR TRABAJO ACTIVO DESDE LA BD
+        // --------------------------------------------------
+
         const sesion = await obtenerSesionEnProgreso();
 
         if (!sesion) {
@@ -425,19 +759,20 @@ function Temporizador({ actualizar, actualizarDatos }) {
         setPausado(false);
         setActivo(true);
 
+        activoRef.current = true;
+
         const transcurrido = Math.floor((Date.now() - inicio.getTime()) / 1000);
 
         const restante = duracion - transcurrido;
 
         if (restante <= 0) {
-          setTiempoRestante(0);
-          setTiempoTerminado(true);
-          setAlarmaActiva(true);
-
           const momentoFinalizacion = new Date(
             inicio.getTime() + duracion * 1000,
           );
 
+          setTiempoRestante(0);
+          setTiempoTerminado(true);
+          setAlarmaActiva(true);
           setInicioTiempoExtra(momentoFinalizacion);
 
           return;
@@ -506,35 +841,23 @@ function Temporizador({ actualizar, actualizarDatos }) {
     duracionActual,
   ]);
 
-  useEffect(() => {
-    if (activo || pausado || tiempoTerminado) {
-      return;
-    }
-
-    const duracionTrabajo = Number(localStorage.getItem("duracionTrabajo"));
-
-    const duracion = duracionTrabajo ? duracionTrabajo * 60 : 25 * 60;
-
-    setTiempoRestante(duracion);
-  }, [actualizar, activo, pausado, tiempoTerminado]);
-
   const esTrabajo = modo === "trabajo";
 
   const tituloDialogo = esTrabajo
-    ? "Terminaste tu tiempo de concentración 🧑‍💻"
-    : "Terminaste tu descanso 🧘";
+    ? "🧑‍💻 Terminaste tu tiempo de concentración"
+    : "🧘 Terminaste tu descanso";
 
   const textoBotonPrincipal = esTrabajo
-    ? "Iniciar descanso 🧘"
-    : "Iniciar concentración 🧑‍💻";
+    ? "🧘 Iniciar descanso"
+    : "🧑‍💻 Iniciar concentración";
 
   const accionBotonPrincipal = esTrabajo
     ? iniciarDescanso
     : iniciarTemporizador;
 
   const textoBotonSecundario = esTrabajo
-    ? "Seguir concentrado 🧑‍💻"
-    : "Seguir descansando 🧘";
+    ? "🧑‍💻 Seguir concentrado"
+    : "🧘 Seguir descansando";
 
   const accionBotonSecundario = esTrabajo
     ? seguirTrabajando
@@ -590,8 +913,17 @@ function Temporizador({ actualizar, actualizarDatos }) {
         <div>
           <h3>{tituloDialogo}</h3>
 
-          <button onClick={accionBotonPrincipal} disabled={terminando}>
-            {terminando && !esTrabajo ? "Procesando..." : textoBotonPrincipal}
+          <button
+            onClick={accionBotonPrincipal}
+            disabled={iniciando || iniciandoDescanso}
+          >
+            {esTrabajo
+              ? iniciandoDescanso
+                ? "Iniciando concentración..."
+                : textoBotonPrincipal
+              : terminando
+                ? "Iniciando descanso..."
+                : textoBotonPrincipal}
           </button>
 
           <button onClick={accionBotonSecundario}>

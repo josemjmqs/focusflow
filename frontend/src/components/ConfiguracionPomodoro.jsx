@@ -16,11 +16,12 @@ function ConfiguracionPomodoro({ volver }) {
     return guardada ? Number(guardada) : 15;
   });
 
-  const [sesionesAntesDescansoLargo, setSesionesAntesDescansoLargo] =
-    useState(() => {
+  const [sesionesAntesDescansoLargo, setSesionesAntesDescansoLargo] = useState(
+    () => {
       const guardada = localStorage.getItem("sesionesAntesDescansoLargo");
       return guardada ? Number(guardada) : 4;
-    });
+    },
+  );
 
   function guardarConfiguracion() {
     localStorage.setItem("duracionTrabajo", duracionTrabajo);
@@ -39,15 +40,14 @@ function ConfiguracionPomodoro({ volver }) {
       <h1>Configuración Pomodoro</h1>
 
       <div>
-        <label htmlFor="duracionTrabajo">
-          Tiempo de concentración:
-        </label>
+        <label htmlFor="duracionTrabajo">Tiempo de concentración:</label>
 
         <input
           id="duracionTrabajo"
           type="number"
-          min="1"
+          min="0.0167"
           max="180"
+          step="0.0001"
           value={duracionTrabajo}
           onChange={(e) => setDuracionTrabajo(Number(e.target.value))}
         />
@@ -56,9 +56,7 @@ function ConfiguracionPomodoro({ volver }) {
       </div>
 
       <div>
-        <label htmlFor="duracionDescansoCorto">
-          Descanso corto:
-        </label>
+        <label htmlFor="duracionDescansoCorto">Descanso corto:</label>
 
         <input
           id="duracionDescansoCorto"
@@ -66,18 +64,14 @@ function ConfiguracionPomodoro({ volver }) {
           min="1"
           max="60"
           value={duracionDescansoCorto}
-          onChange={(e) =>
-            setDuracionDescansoCorto(Number(e.target.value))
-          }
+          onChange={(e) => setDuracionDescansoCorto(Number(e.target.value))}
         />
 
         <span> minutos</span>
       </div>
 
       <div>
-        <label htmlFor="duracionDescansoLargo">
-          Descanso largo:
-        </label>
+        <label htmlFor="duracionDescansoLargo">Descanso largo:</label>
 
         <input
           id="duracionDescansoLargo"
@@ -85,9 +79,7 @@ function ConfiguracionPomodoro({ volver }) {
           min="1"
           max="60"
           value={duracionDescansoLargo}
-          onChange={(e) =>
-            setDuracionDescansoLargo(Number(e.target.value))
-          }
+          onChange={(e) => setDuracionDescansoLargo(Number(e.target.value))}
         />
 
         <span> minutos</span>

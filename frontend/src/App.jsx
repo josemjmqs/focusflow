@@ -86,10 +86,7 @@ function App() {
       </div>
 
       <div className="seccion-temporizador">
-        <Temporizador
-          actualizar={actualizar}
-          actualizarDatos={actualizarDatos}
-        />
+        <Temporizador key={actualizar} actualizarDatos={actualizarDatos} />
       </div>
 
       <div className="seccion-estadisticas">
