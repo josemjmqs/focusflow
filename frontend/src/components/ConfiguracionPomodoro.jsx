@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./ConfiguracionPomodoro.css";
 
 function ConfiguracionPomodoro({ volver }) {
   const [duracionTrabajo, setDuracionTrabajo] = useState(() => {
@@ -16,12 +17,11 @@ function ConfiguracionPomodoro({ volver }) {
     return guardada ? Number(guardada) : 15;
   });
 
-  const [sesionesAntesDescansoLargo, setSesionesAntesDescansoLargo] = useState(
-    () => {
+  const [sesionesAntesDescansoLargo, setSesionesAntesDescansoLargo] =
+    useState(() => {
       const guardada = localStorage.getItem("sesionesAntesDescansoLargo");
       return guardada ? Number(guardada) : 4;
-    },
-  );
+    });
 
   function guardarConfiguracion() {
     localStorage.setItem("duracionTrabajo", duracionTrabajo);
@@ -36,77 +36,152 @@ function ConfiguracionPomodoro({ volver }) {
   }
 
   return (
-    <div>
-      <h1>Configuración Pomodoro</h1>
+    <div className="configuracion-pomodoro">
+      <div className="configuracion-contenedor">
+        <div className="configuracion-encabezado">
+          <span className="configuracion-icono">⚙️</span>
 
-      <div>
-        <label htmlFor="duracionTrabajo">Tiempo de concentración:</label>
+          <div>
+            <h1>Configuración Pomodoro</h1>
+            <p>Personaliza tus tiempos de concentración y descanso.</p>
+          </div>
+        </div>
 
-        <input
-          id="duracionTrabajo"
-          type="number"
-          min="0.0167"
-          max="180"
-          step="0.0001"
-          value={duracionTrabajo}
-          onChange={(e) => setDuracionTrabajo(Number(e.target.value))}
-        />
+        <div className="configuracion-seccion">
+          <h2>🎯 Concentración</h2>
 
-        <span> minutos</span>
+          <div className="configuracion-opcion">
+            <div>
+              <label htmlFor="duracionTrabajo">
+                Tiempo de concentración
+              </label>
+
+              <p>Duración de cada sesión de trabajo.</p>
+            </div>
+
+            <div className="configuracion-input">
+              <input
+                id="duracionTrabajo"
+                type="number"
+                min="0.0167"
+                max="180"
+                step="any"
+                value={duracionTrabajo}
+                onChange={(e) =>
+                  setDuracionTrabajo(Number(e.target.value))
+                }
+              />
+
+              <span>min</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="configuracion-seccion">
+          <h2>☕ Descansos</h2>
+
+          <div className="configuracion-opcion">
+            <div>
+              <label htmlFor="duracionDescansoCorto">
+                Descanso corto
+              </label>
+
+              <p>Descanso entre sesiones de concentración.</p>
+            </div>
+
+            <div className="configuracion-input">
+              <input
+                id="duracionDescansoCorto"
+                type="number"
+                min="0.0167"
+                max="60"
+                step="any"
+                value={duracionDescansoCorto}
+                onChange={(e) =>
+                  setDuracionDescansoCorto(Number(e.target.value))
+                }
+              />
+
+              <span>min</span>
+            </div>
+          </div>
+
+          <div className="configuracion-opcion">
+            <div>
+              <label htmlFor="duracionDescansoLargo">
+                Descanso largo
+              </label>
+
+              <p>Descanso después de completar el ciclo.</p>
+            </div>
+
+            <div className="configuracion-input">
+              <input
+                id="duracionDescansoLargo"
+                type="number"
+                min="0.0167"
+                max="60"
+                step="any"
+                value={duracionDescansoLargo}
+                onChange={(e) =>
+                  setDuracionDescansoLargo(Number(e.target.value))
+                }
+              />
+
+              <span>min</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="configuracion-seccion">
+          <h2>🔄 Ciclo Pomodoro</h2>
+
+          <div className="configuracion-opcion">
+            <div>
+              <label htmlFor="sesionesAntesDescansoLargo">
+                Sesiones antes del descanso largo
+              </label>
+
+              <p>
+                Cantidad de sesiones de concentración antes de un
+                descanso largo.
+              </p>
+            </div>
+
+            <div className="configuracion-input">
+              <input
+                id="sesionesAntesDescansoLargo"
+                type="number"
+                min="1"
+                max="10"
+                step="1"
+                value={sesionesAntesDescansoLargo}
+                onChange={(e) =>
+                  setSesionesAntesDescansoLargo(Number(e.target.value))
+                }
+              />
+
+              <span>sesiones</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="configuracion-acciones">
+          <button
+            className="boton-secundario"
+            onClick={volver}
+          >
+            Volver
+          </button>
+
+          <button
+            className="boton-guardar"
+            onClick={guardarConfiguracion}
+          >
+            Guardar cambios
+          </button>
+        </div>
       </div>
-
-      <div>
-        <label htmlFor="duracionDescansoCorto">Descanso corto:</label>
-
-        <input
-          id="duracionDescansoCorto"
-          type="number"
-          min="1"
-          max="60"
-          value={duracionDescansoCorto}
-          onChange={(e) => setDuracionDescansoCorto(Number(e.target.value))}
-        />
-
-        <span> minutos</span>
-      </div>
-
-      <div>
-        <label htmlFor="duracionDescansoLargo">Descanso largo:</label>
-
-        <input
-          id="duracionDescansoLargo"
-          type="number"
-          min="1"
-          max="60"
-          value={duracionDescansoLargo}
-          onChange={(e) => setDuracionDescansoLargo(Number(e.target.value))}
-        />
-
-        <span> minutos</span>
-      </div>
-
-      <div>
-        <label htmlFor="sesionesAntesDescansoLargo">
-          Sesiones antes del descanso largo:
-        </label>
-
-        <input
-          id="sesionesAntesDescansoLargo"
-          type="number"
-          min="1"
-          max="10"
-          value={sesionesAntesDescansoLargo}
-          onChange={(e) =>
-            setSesionesAntesDescansoLargo(Number(e.target.value))
-          }
-        />
-
-        <span> sesiones</span>
-      </div>
-
-      <button onClick={guardarConfiguracion}>Guardar</button>
-
-      <button onClick={volver}>Volver</button>
     </div>
   );
 }
