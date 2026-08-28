@@ -53,12 +53,36 @@ function Temporizador({ actualizarDatos }) {
     return `${String(minutos).padStart(2, "0")}:${String(segundosRestantes).padStart(2, "0")}`;
   }
 
-  function mostrarNotificacion(titulo, mensaje) {
-    if (Notification.permission === "granted") {
-      new Notification(titulo, {
-        body: mensaje,
-      });
+  async function mostrarNotificacion(titulo, mensaje) {
+    if (Notification.permission !== "granted") {
+      return;
     }
+
+    if (!("serviceWorker" in navigator)) {
+      return;
+    }
+
+    const registro = await navigator.serviceWorker.ready;
+
+    await registro.showNotification(titulo, {
+      body: mensaje,
+      icon: "/pwa-192x192.png",
+      badge: "/pwa-192x192.png",
+    });
+  }
+
+  async function mostrarNotificacionSistema(titulo, mensaje) {
+    if (!("serviceWorker" in navigator)) {
+      return;
+    }
+
+    const registro = await navigator.serviceWorker.ready;
+
+    await registro.showNotification(titulo, {
+      body: mensaje,
+      icon: "/pwa-192x192.png",
+      badge: "/pwa-192x192.png",
+    });
   }
 
   function obtenerConfiguracionPomodoro() {
@@ -76,22 +100,51 @@ function Temporizador({ actualizarDatos }) {
     };
   }
 
-  function guardarEstadoDescanso() {
+  function guardarEstadoDescanso({
+    inicioTemporizadorActual = inicioTemporizador,
+    duracionActualActual = duracionActual,
+    tiempoAcumuladoActual = tiempoAcumulado,
+    activoActual = activo,
+    pausadoActual = pausado,
+    tiempoTerminadoActual = tiempoTerminado,
+    inicioTiempoExtraActual = inicioTiempoExtra,
+    tiempoExtraAcumuladoActual = tiempoExtraAcumulado,
+  } = {}) {
+    let fechaFinalizacion = null;
+
+    if (
+      activoActual &&
+      !pausadoActual &&
+      !tiempoTerminadoActual &&
+      inicioTemporizadorActual
+    ) {
+      const tiempoRestante = duracionActualActual - tiempoAcumuladoActual;
+
+      fechaFinalizacion = new Date(Date.now() + tiempoRestante * 1000);
+    }
+
     localStorage.setItem(
       "estadoDescanso",
       JSON.stringify({
-        inicioTemporizador: inicioTemporizador
-          ? inicioTemporizador.toISOString()
+        inicioTemporizador: inicioTemporizadorActual
+          ? inicioTemporizadorActual.toISOString()
           : null,
-        duracionActual,
-        tiempoAcumulado,
-        activo,
-        pausado,
-        tiempoTerminado,
-        inicioTiempoExtra: inicioTiempoExtra
-          ? inicioTiempoExtra.toISOString()
+
+        fechaFinalizacion: fechaFinalizacion
+          ? fechaFinalizacion.toISOString()
           : null,
-        tiempoExtraAcumulado,
+
+        duracionActual: duracionActualActual,
+        tiempoAcumulado: tiempoAcumuladoActual,
+        activo: activoActual,
+        pausado: pausadoActual,
+        tiempoTerminado: tiempoTerminadoActual,
+
+        inicioTiempoExtra: inicioTiempoExtraActual
+          ? inicioTiempoExtraActual.toISOString()
+          : null,
+
+        tiempoExtraAcumulado: tiempoExtraAcumuladoActual,
       }),
     );
   }
@@ -339,21 +392,14 @@ function Temporizador({ actualizarDatos }) {
       setInicioTiempoExtra(null);
 
       if (modo === "descanso") {
-        localStorage.setItem(
-          "estadoDescanso",
-          JSON.stringify({
-            inicioTemporizador: inicioTemporizador
-              ? inicioTemporizador.toISOString()
-              : null,
-            duracionActual,
-            tiempoAcumulado,
-            activo: false,
-            pausado: true,
-            tiempoTerminado: true,
-            inicioTiempoExtra: null,
-            tiempoExtraAcumulado: transcurrido,
-          }),
-        );
+        guardarEstadoDescanso({
+          inicioTemporizadorActual: null,
+          activoActual: false,
+          pausadoActual: true,
+          tiempoTerminadoActual: true,
+          inicioTiempoExtraActual: null,
+          tiempoExtraAcumuladoActual: transcurrido,
+        });
       }
     } else {
       const transcurrido = calcularSegundosTranscurridos();
@@ -361,31 +407,16 @@ function Temporizador({ actualizarDatos }) {
       setTiempoAcumulado(transcurrido);
       setInicioTemporizador(null);
 
-      if (modo === "trabajo") {
-        localStorage.setItem(
-          "estadoTrabajo",
-          JSON.stringify({
-            pausado: true,
-            tiempoAcumulado: transcurrido,
-            duracionActual,
-          }),
-        );
-      }
-
       if (modo === "descanso") {
-        localStorage.setItem(
-          "estadoDescanso",
-          JSON.stringify({
-            inicioTemporizador: null,
-            duracionActual,
-            tiempoAcumulado: transcurrido,
-            activo: false,
-            pausado: true,
-            tiempoTerminado: false,
-            inicioTiempoExtra: null,
-            tiempoExtraAcumulado: 0,
-          }),
-        );
+        guardarEstadoDescanso({
+          inicioTemporizadorActual: null,
+          tiempoAcumuladoActual: transcurrido,
+          activoActual: false,
+          pausadoActual: true,
+          tiempoTerminadoActual: false,
+          inicioTiempoExtraActual: null,
+          tiempoExtraAcumuladoActual: 0,
+        });
       }
     }
 
@@ -423,10 +454,17 @@ function Temporizador({ actualizarDatos }) {
       }
 
       if (modo === "descanso") {
+        const tiempoRestanteActual = duracionActual - tiempoAcumulado;
+
+        const fechaFinalizacion = new Date(
+          ahora.getTime() + tiempoRestanteActual * 1000,
+        );
+
         localStorage.setItem(
           "estadoDescanso",
           JSON.stringify({
             inicioTemporizador: ahora.toISOString(),
+            fechaFinalizacion: fechaFinalizacion.toISOString(),
             duracionActual,
             tiempoAcumulado,
             activo: true,
@@ -610,6 +648,10 @@ function Temporizador({ actualizarDatos }) {
             ? new Date(estado.inicioTiempoExtra)
             : null;
 
+          const fechaFinalizacion = estado.fechaFinalizacion
+            ? new Date(estado.fechaFinalizacion)
+            : null;
+
           setModo("descanso");
           setDuracionActual(estado.duracionActual);
           setTiempoAcumulado(estado.tiempoAcumulado || 0);
@@ -623,7 +665,10 @@ function Temporizador({ actualizarDatos }) {
 
           activoRef.current = estado.activo;
 
-          // Descanso pausado
+          // --------------------------------------------------
+          // DESCANSO PAUSADO
+          // --------------------------------------------------
+
           if (estado.pausado) {
             if (estado.tiempoTerminado) {
               setTiempoRestante(0);
@@ -639,7 +684,10 @@ function Temporizador({ actualizarDatos }) {
             return;
           }
 
-          // Descanso terminado, con tiempo extra
+          // --------------------------------------------------
+          // DESCANSO TERMINADO, CON TIEMPO EXTRA
+          // --------------------------------------------------
+
           if (estado.tiempoTerminado && inicioExtra) {
             const tiempoExtra =
               (estado.tiempoExtraAcumulado || 0) +
@@ -654,20 +702,38 @@ function Temporizador({ actualizarDatos }) {
             return;
           }
 
-          // Descanso activo
-          if (inicio) {
-            const transcurrido =
-              (estado.tiempoAcumulado || 0) +
-              Math.floor((Date.now() - inicio.getTime()) / 1000);
+          // --------------------------------------------------
+          // DESCANSO ACTIVO
+          // --------------------------------------------------
 
-            const restante = estado.duracionActual - transcurrido;
+          if (estado.activo && inicio) {
+            let restante;
 
-            if (restante <= 0) {
-              const momentoFinalizacion = new Date(
-                inicio.getTime() +
-                  (estado.duracionActual - (estado.tiempoAcumulado || 0)) *
-                    1000,
+            if (fechaFinalizacion) {
+              // Usamos la hora absoluta de finalización.
+              restante = Math.ceil(
+                (fechaFinalizacion.getTime() - Date.now()) / 1000,
               );
+            } else {
+              // Compatibilidad con estados antiguos que no
+              // tenían fechaFinalizacion.
+              const transcurrido =
+                (estado.tiempoAcumulado || 0) +
+                Math.floor((Date.now() - inicio.getTime()) / 1000);
+
+              restante = estado.duracionActual - transcurrido;
+            }
+
+            // El descanso terminó mientras la página estaba
+            // cerrada o suspendida.
+            if (restante <= 0) {
+              const momentoFinalizacion = fechaFinalizacion
+                ? fechaFinalizacion
+                : new Date(
+                    inicio.getTime() +
+                      (estado.duracionActual - (estado.tiempoAcumulado || 0)) *
+                        1000,
+                  );
 
               setTiempoRestante(0);
               setTiempoTerminado(true);
@@ -678,6 +744,8 @@ function Temporizador({ actualizarDatos }) {
                 "estadoDescanso",
                 JSON.stringify({
                   ...estado,
+                  activo: true,
+                  pausado: false,
                   tiempoTerminado: true,
                   inicioTiempoExtra: momentoFinalizacion.toISOString(),
                   tiempoExtraAcumulado: 0,
