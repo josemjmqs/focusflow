@@ -324,6 +324,45 @@ function Temporizador({ actualizarDatos }) {
     }
   }
 
+  function terminarDescansoManual() {
+    setTerminando(true);
+
+    try {
+      setError("");
+      setAlarmaActiva(false);
+
+      // Detener el descanso
+      setActivo(false);
+      activoRef.current = false;
+
+      // Limpiar estado del descanso
+      borrarEstadoDescanso();
+      localStorage.removeItem("modoTemporizador");
+
+      setModo("trabajo");
+      setPausado(false);
+      setTiempoTerminado(false);
+
+      setInicioTemporizador(null);
+      setInicioTiempoExtra(null);
+
+      setTiempoAcumulado(0);
+      setTiempoExtraAcumulado(0);
+
+      setDuracionActual(0);
+
+      // Preparar el próximo trabajo
+      const configuracion = obtenerConfiguracionPomodoro();
+      const duracionTrabajo = configuracion.duracionTrabajo * 60;
+
+      setTiempoRestante(duracionTrabajo);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setTerminando(false);
+    }
+  }
+
   // Manejo del temporizador
   async function iniciarTemporizador() {
     setIniciando(true);
@@ -525,24 +564,34 @@ function Temporizador({ actualizarDatos }) {
 
       if (esDescansoLargo) {
         setSesionesCompletadasCiclo(0);
+
         localStorage.setItem("sesionesCompletadasCiclo", "0");
       } else {
         setSesionesCompletadasCiclo(nuevasSesionesCompletadas);
+
         localStorage.setItem(
           "sesionesCompletadasCiclo",
           String(nuevasSesionesCompletadas),
         );
       }
 
+      // Calcular duración del descanso
       const duracionDescanso = esDescansoLargo
         ? configuracion.duracionDescansoLargo * 60
         : configuracion.duracionDescansoCorto * 60;
 
       const ahora = new Date();
 
+      // Nueva fecha absoluta de finalización
+      const fechaFinalizacion = new Date(
+        ahora.getTime() + duracionDescanso * 1000,
+      );
+
       console.log("Duración descanso:", duracionDescanso);
       console.log("Iniciando descanso a:", ahora);
+      console.log("Fecha finalización:", fechaFinalizacion);
 
+      // Configurar temporizador
       setModo("descanso");
       setTiempoTerminado(false);
       setTiempoExtraAcumulado(0);
@@ -557,10 +606,13 @@ function Temporizador({ actualizarDatos }) {
       setPausado(false);
       setActivo(true);
       activoRef.current = true;
+
+      // Guardar estado del descanso
       localStorage.setItem(
         "estadoDescanso",
         JSON.stringify({
           inicioTemporizador: ahora.toISOString(),
+          fechaFinalizacion: fechaFinalizacion.toISOString(),
           duracionActual: duracionDescanso,
           tiempoAcumulado: 0,
           activo: true,
@@ -576,6 +628,7 @@ function Temporizador({ actualizarDatos }) {
       console.log("=== DESCANSO INICIADO ===");
     } catch (error) {
       console.error("Error iniciando descanso:", error);
+
       setError(error.message);
     } finally {
       setIniciandoDescanso(false);
@@ -911,10 +964,6 @@ function Temporizador({ actualizarDatos }) {
 
   const esTrabajo = modo === "trabajo";
 
-  const tituloDialogo = esTrabajo
-    ? "🧑‍💻 Terminaste tu tiempo de concentración"
-    : "🧘 Terminaste tu descanso";
-
   const textoBotonPrincipal = esTrabajo
     ? "🧘 Iniciar descanso"
     : "🧑‍💻 Iniciar concentración";
@@ -951,16 +1000,12 @@ function Temporizador({ actualizarDatos }) {
         </button>
       )}
 
-      {activo && <button onClick={pausarTemporizador}>⏸ Pausar</button>}
-
-      {!activo && pausado && (
-        <button onClick={reanudarTemporizador}>▶ Reanudar</button>
+      {activo && !tiempoTerminado && (
+        <button onClick={pausarTemporizador}>⏸ Pausar</button>
       )}
 
-      {idSesion && (
-        <button onClick={terminarSesionManual} disabled={terminando}>
-          {terminando ? "Terminando..." : "Terminar sesión"}
-        </button>
+      {!activo && pausado && !tiempoTerminado && (
+        <button onClick={reanudarTemporizador}>▶ Reanudar</button>
       )}
 
       {error && (
@@ -979,25 +1024,28 @@ function Temporizador({ actualizarDatos }) {
 
       {tiempoTerminado && (
         <div>
-          <h3>{tituloDialogo}</h3>
-
           <button
             onClick={accionBotonPrincipal}
             disabled={iniciando || iniciandoDescanso}
           >
-            {esTrabajo
-              ? iniciandoDescanso
-                ? "Iniciando concentración..."
-                : textoBotonPrincipal
-              : terminando
-                ? "Iniciando descanso..."
-                : textoBotonPrincipal}
+            {iniciandoDescanso ? "Iniciando descanso..." : textoBotonPrincipal}
           </button>
 
           <button onClick={accionBotonSecundario}>
             {textoBotonSecundario}
           </button>
         </div>
+      )}
+
+      {(idSesion || modo === "descanso") && (
+        <button
+          onClick={
+            modo === "descanso" ? terminarDescansoManual : terminarSesionManual
+          }
+          disabled={terminando}
+        >
+          {terminando ? "Terminando..." : "Terminar sesión"}
+        </button>
       )}
     </div>
   );
