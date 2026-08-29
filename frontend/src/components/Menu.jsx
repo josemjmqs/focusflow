@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./Menu.css";
 
 function Menu({ mostrarHistorial, mostrarConfiguracion, cerrarSesion }) {
   const [abierto, setAbierto] = useState(false);

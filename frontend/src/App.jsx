@@ -60,16 +60,23 @@ function App() {
 
   if (mostrarHistorial) {
     return (
-      <>
-        <h1>FocusFlow</h1>
+      <div className="pagina-historial">
+        <div className="encabezado">
+          <h1>FocusFlow</h1>
+        </div>
 
-        <button onClick={() => setMostrarHistorial(false)}>Volver</button>
+        <button
+          className="boton-volver"
+          onClick={() => setMostrarHistorial(false)}
+        >
+          Volver
+        </button>
 
         <Historial
           actualizar={actualizar}
           cambiarActualizacion={actualizarDatos}
         />
-      </>
+      </div>
     );
   }
 

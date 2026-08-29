@@ -1,30 +1,151 @@
+.temporizador-modo {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.temporizador-modo h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* Tiempo principal */
+
+.temporizador-tiempo {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.temporizador-tiempo h1 {
+  margin: 0;
+  font-size: 64px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -2px;
+}
+
+/* Tiempo extra */
+
 .tiempo-extra {
   text-align: center;
 }
 
 .tiempo-extra span {
   display: block;
-  font-size: 14px;
+  margin-bottom: 6px;
+
+  font-size: 13px;
   font-weight: 600;
-  margin-bottom: 4px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
 }
 
 .tiempo-extra h1 {
   margin: 0;
+  font-size: 52px;
 }
 
-.tiempo-extra {
-  text-align: center;
-  color: #b7791f;
+/* Acciones principales */
+
+.acciones-temporizador {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
 
-.temporizador-tiempo {
-  text-align: center;
-  margin-bottom: 20px;
+/* Botones cuando termina el temporizador */
+
+.acciones-tiempo-terminado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
 }
 
-.temporizador-tiempo h1 {
-  margin: 0;
+/* Botón terminar sesión */
+
+.accion-terminar-sesion {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+/* Botones */
+
+.acciones-temporizador button,
+.acciones-tiempo-terminado button,
+.accion-terminar-sesion button {
+  min-width: 150px;
+  padding: 10px 18px;
+
+  border: none;
+  border-radius: 8px;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.acciones-temporizador button:hover,
+.acciones-tiempo-terminado button:hover,
+.accion-terminar-sesion button:hover {
+  transform: translateY(-1px);
+}
+
+/* Botón deshabilitado */
+
+.acciones-temporizador button:disabled,
+.acciones-tiempo-terminado button:disabled,
+.accion-terminar-sesion button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Error */
+
+.temporizador-error {
+  max-width: 420px;
+  margin: 16px auto;
+
+  padding: 10px 14px;
+
+  color: #b91c1c;
+  background-color: #fee2e2;
+
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+
+  font-size: 14px;
+}
+
+/* Celular */
+
+@media (max-width: 600px) {
+  .temporizador-modo h2 {
+    font-size: 18px;
+  }
+
+  .temporizador-tiempo h1 {
+    font-size: 52px;
+    letter-spacing: -1.5px;
+  }
+
+  .tiempo-extra h1 {
+    font-size: 44px;
+  }
+
+  .acciones-temporizador button,
+  .acciones-tiempo-terminado button,
+  .accion-terminar-sesion button {
+    min-width: 140px;
+  }
 }

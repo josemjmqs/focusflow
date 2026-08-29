@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { register } from "../services/api";
+import "./Registro.css";
 
 function Registro({ volverAlLogin }) {
   const [nombre, setNombre] = useState("");
@@ -19,41 +20,64 @@ function Registro({ volverAlLogin }) {
   }
 
   return (
-    <div>
-      <h2>Crear cuenta</h2>
+    <div className="registro">
+      <div className="registro-contenedor">
+        <div className="registro-encabezado">
+          <h1>FocusFlow</h1>
+          <h2>Crear cuenta</h2>
+          <p>Crea tu cuenta y comienza a organizar tu tiempo.</p>
+        </div>
 
-      <input
-        type="text"
-        placeholder="Nombre"
-        value={nombre}
-        onChange={(e) => setNombre(e.target.value)}
-      />
+        <div className="registro-formulario">
+          <div className="registro-campo">
+            <label htmlFor="nombre">Nombre</label>
 
-      <br />
+            <input
+              id="nombre"
+              type="text"
+              placeholder="Tu nombre"
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+            />
+          </div>
 
-      <input
-        type="email"
-        placeholder="Correo"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+          <div className="registro-campo">
+            <label htmlFor="email">Correo</label>
 
-      <br />
+            <input
+              id="email"
+              type="email"
+              placeholder="tu@correo.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
 
-      <input
-        type="password"
-        placeholder="Contraseña"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+          <div className="registro-campo">
+            <label htmlFor="password">Contraseña</label>
 
-      <br />
+            <input
+              id="password"
+              type="password"
+              placeholder="Contraseña"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
 
-      <button onClick={crearCuenta}>Crear cuenta</button>
+          <button className="registro-boton-principal" onClick={crearCuenta}>
+            Crear cuenta
+          </button>
+        </div>
 
-      <p>¿Ya tienes cuenta?</p>
+        <div className="registro-login">
+          <p>¿Ya tienes cuenta?</p>
 
-      <button onClick={volverAlLogin}>Iniciar sesión</button>
+          <button className="registro-boton-secundario" onClick={volverAlLogin}>
+            Iniciar sesión
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

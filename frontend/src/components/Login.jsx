@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { login } from "../services/api";
+import "./Login.css";
 
 function Login({ onLogin, crearCuenta }) {
   const [email, setEmail] = useState("");
@@ -18,38 +19,58 @@ function Login({ onLogin, crearCuenta }) {
   }
 
   return (
-    <div>
-      <h2>Iniciar sesión</h2>
+    <div className="login">
+      <div className="login-contenedor">
+        <div className="login-encabezado">
+          <h1>FocusFlow</h1>
+          <h2>Iniciar sesión</h2>
+          <p>Organiza tu tiempo y mejora tu concentración.</p>
+        </div>
 
-      <input
-        type="email"
-        placeholder="Correo"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+        <div className="login-formulario">
+          <div className="login-campo">
+            <label htmlFor="email">Correo</label>
 
-      <br />
+            <input
+              id="email"
+              type="email"
+              placeholder="tu@correo.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
 
-      <input
-        type="password"
-        placeholder="Contraseña"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+          <div className="login-campo">
+            <label htmlFor="password">Contraseña</label>
 
-      <br />
+            <input
+              id="password"
+              type="password"
+              placeholder="Contraseña"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
 
-      <button onClick={iniciarSesion}>Iniciar sesión</button>
+          <button className="login-boton-principal" onClick={iniciarSesion}>
+            Iniciar sesión
+          </button>
+        </div>
 
-      <p>¿No tienes cuenta?</p>
-      <button
-        onClick={() => {
-          console.log("Crear cuenta");
-          crearCuenta();
-        }}
-      >
-        Crear cuenta
-      </button>
+        <div className="login-registro">
+          <p>¿No tienes cuenta?</p>
+
+          <button
+            className="login-boton-secundario"
+            onClick={() => {
+              console.log("Crear cuenta");
+              crearCuenta();
+            }}
+          >
+            Crear cuenta
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import {
   restaurarSesion,
 } from "../services/api";
 import { formatearDuracion } from "../utils/formatearDuracion";
+import "./Historial.css";
 
 function Historial({ actualizar, cambiarActualizacion }) {
   const [sesiones, setSesiones] = useState([]);
@@ -45,32 +46,55 @@ function Historial({ actualizar, cambiarActualizacion }) {
   }
 
   return (
-    <div>
-      <h2>Historial</h2>
+    <div className="historial">
+      <h2 className="historial-titulo">Historial</h2>
 
-      {sesiones.map((sesion) => (
-        <div key={sesion.id}>
-          <p>Inicio: {formatearFechaHora(sesion.inicio)}</p>
+      <div className="historial-lista">
+        {sesiones.map((sesion) => (
+          <div className="historial-sesion" key={sesion.id}>
+            <div className="historial-datos">
+              <p>
+                <strong>Inicio:</strong> {formatearFechaHora(sesion.inicio)}
+              </p>
 
-          <p>Fin: {formatearFechaHora(sesion.fin)}</p>
+              <p>
+                <strong>Fin:</strong> {formatearFechaHora(sesion.fin)}
+              </p>
 
-          <p>Duración: {formatearDuracion(sesion.duracion)}</p>
+              <p>
+                <strong>Duración:</strong> {formatearDuracion(sesion.duracion)}
+              </p>
 
-          <p>Estado: {sesion.estado}</p>
+              <p>
+                <strong>Estado:</strong>{" "}
+                <span className={`estado-${sesion.estado}`}>
+                  {sesion.estado}
+                </span>
+              </p>
+            </div>
 
-          {sesion.estado === "completada" && (
-            <button onClick={() => handleCancelar(sesion.id)}>Cancelar</button>
-          )}
+            <div className="historial-acciones">
+              {sesion.estado === "completada" && (
+                <button
+                  className="boton-cancelar"
+                  onClick={() => handleCancelar(sesion.id)}
+                >
+                  Cancelar
+                </button>
+              )}
 
-          {sesion.estado === "cancelada" && (
-            <button onClick={() => handleRestaurar(sesion.id)}>
-              Restaurar
-            </button>
-          )}
-
-          <hr />
-        </div>
-      ))}
+              {sesion.estado === "cancelada" && (
+                <button
+                  className="boton-restaurar"
+                  onClick={() => handleRestaurar(sesion.id)}
+                >
+                  Restaurar
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

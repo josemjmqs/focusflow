@@ -356,6 +356,8 @@ function Temporizador({ actualizarDatos }) {
       const duracionTrabajo = configuracion.duracionTrabajo * 60;
 
       setTiempoRestante(duracionTrabajo);
+
+      actualizarDatos();
     } catch (error) {
       setError(error.message);
     } finally {
@@ -544,6 +546,8 @@ function Temporizador({ actualizarDatos }) {
       console.log("Finalizando sesión:", idSesion);
 
       await finalizarSesion(idSesion, duracion);
+
+      actualizarDatos();
 
       console.log("Sesión finalizada");
 
@@ -982,7 +986,9 @@ function Temporizador({ actualizarDatos }) {
 
   return (
     <div>
-      <h3>{modo === "trabajo" ? "🧑‍💻 Trabajo" : "🧘 Descanso"}</h3>
+      <div className="temporizador-modo">
+        <h2>{esTrabajo ? "🧑‍💻 Trabajo" : "🧘 Descanso"}</h2>
+      </div>
       <div className="temporizador-tiempo">
         {tiempoTerminado ? (
           <div className="tiempo-extra">
@@ -994,36 +1000,26 @@ function Temporizador({ actualizarDatos }) {
         )}
       </div>
 
-      {!activo && !pausado && (
-        <button onClick={iniciarTemporizador} disabled={iniciando}>
-          {iniciando ? "Iniciando..." : "Iniciar"}
-        </button>
-      )}
+      <div className="acciones-temporizador">
+        {!activo && !pausado && (
+          <button onClick={iniciarTemporizador} disabled={iniciando}>
+            {iniciando ? "Iniciando..." : "Iniciar"}
+          </button>
+        )}
 
-      {activo && !tiempoTerminado && (
-        <button onClick={pausarTemporizador}>⏸ Pausar</button>
-      )}
+        {activo && !tiempoTerminado && (
+          <button onClick={pausarTemporizador}>⏸ Pausar</button>
+        )}
 
-      {!activo && pausado && !tiempoTerminado && (
-        <button onClick={reanudarTemporizador}>▶ Reanudar</button>
-      )}
+        {!activo && pausado && !tiempoTerminado && (
+          <button onClick={reanudarTemporizador}>▶ Reanudar</button>
+        )}
+      </div>
 
-      {error && (
-        <p
-          style={{
-            color: "#b91c1c",
-            backgroundColor: "#fee2e2",
-            padding: "10px 14px",
-            borderRadius: "6px",
-            margin: "10px 0",
-          }}
-        >
-          {error}
-        </p>
-      )}
+      {error && <p className="temporizador-error">{error}</p>}
 
       {tiempoTerminado && (
-        <div>
+        <div className="acciones-tiempo-terminado">
           <button
             onClick={accionBotonPrincipal}
             disabled={iniciando || iniciandoDescanso}
@@ -1038,14 +1034,18 @@ function Temporizador({ actualizarDatos }) {
       )}
 
       {(idSesion || modo === "descanso") && (
-        <button
-          onClick={
-            modo === "descanso" ? terminarDescansoManual : terminarSesionManual
-          }
-          disabled={terminando}
-        >
-          {terminando ? "Terminando..." : "Terminar sesión"}
-        </button>
+        <div className="accion-terminar-sesion">
+          <button
+            onClick={
+              modo === "descanso"
+                ? terminarDescansoManual
+                : terminarSesionManual
+            }
+            disabled={terminando}
+          >
+            {terminando ? "Terminando..." : "Terminar sesión"}
+          </button>
+        </div>
       )}
     </div>
   );

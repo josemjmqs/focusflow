@@ -9,9 +9,13 @@ function Estadisticas({ actualizar }) {
   const [datos, setDatos] = useState(null);
 
   useEffect(() => {
-    obtenerEstadisticas().then((resultado) => {
-      setDatos(resultado);
-    });
+    obtenerEstadisticas()
+      .then((resultado) => {
+        setDatos(resultado);
+      })
+      .catch((error) => {
+        console.error("Error obteniendo estadísticas:", error);
+      });
   }, [actualizar]);
 
   if (!datos) {
