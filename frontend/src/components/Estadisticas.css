@@ -61,21 +61,21 @@
 .grafico {
   display: flex;
   align-items: flex-end;
-  justify-content: space-evenly;
-  gap: 16px;
-
+  justify-content: space-between;
+  gap: 8px;
   height: 250px;
-  padding: 20px 0 0;
+  padding: 20px 8px 0;
+  box-sizing: border-box;
 }
 
 .barra-contenedor {
   display: flex;
+  flex: 1;
+  min-width: 0;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-
   height: 100%;
-  flex: 1;
 }
 
 .barra-valor {
@@ -121,8 +121,7 @@
 /* Celular */
 
 @media (max-width: 480px) {
-  .estadistica-hoy,
-  .estadisticas-semana {
+  .estadistica-hoy {
     padding: 18px;
   }
 
@@ -136,7 +135,7 @@
 
   .grafico {
     gap: 4px;
-    padding: 8px 0 0;
+    padding: 8px 4px 0;
   }
 
   .barra {
@@ -148,6 +147,6 @@
   }
 
   .barra-dia {
-    font-size: 11px;
+    font-size: 12px;
   }
 }
