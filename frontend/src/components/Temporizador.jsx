@@ -68,6 +68,17 @@ function Temporizador({ actualizarDatos }) {
       body: mensaje,
       icon: "/pwa-192x192.png",
       badge: "/pwa-192x192.png",
+
+      actions: [
+        {
+          action: "iniciar-descanso",
+          title: "🧘 Iniciar descanso",
+        },
+        {
+          action: "seguir-concentrado",
+          title: "🧑‍💻 Seguir concentrado",
+        },
+      ],
     });
   }
 
