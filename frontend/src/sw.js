@@ -32,3 +32,27 @@ self.addEventListener("push", (event) => {
     }),
   );
 });
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+
+  const accion = event.action;
+
+  event.waitUntil(
+    self.clients
+      .matchAll({
+        type: "window",
+        includeUncontrolled: true,
+      })
+      .then((clientes) => {
+        if (clientes.length > 0) {
+          clientes[0].postMessage({
+            tipo: "accion-notificacion",
+            accion,
+          });
+
+          return clientes[0].focus();
+        }
+      }),
+  );
+});

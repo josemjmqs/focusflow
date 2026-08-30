@@ -53,6 +53,10 @@ function Temporizador({ actualizarDatos }) {
     return `${String(minutos).padStart(2, "0")}:${String(segundosRestantes).padStart(2, "0")}`;
   }
 
+  async function probarNotificacion() {
+    await mostrarNotificacion("FocusFlow", "Prueba de notificación");
+  }
+
   async function mostrarNotificacion(titulo, mensaje) {
     if (Notification.permission !== "granted") {
       return;
@@ -977,6 +981,28 @@ function Temporizador({ actualizarDatos }) {
     duracionActual,
   ]);
 
+  useEffect(() => {
+    function manejarMensaje(event) {
+      if (event.data?.tipo !== "accion-notificacion") {
+        return;
+      }
+
+      if (event.data.accion === "iniciar-descanso") {
+        iniciarDescanso();
+      }
+
+      if (event.data.accion === "seguir-concentrado") {
+        seguirTrabajando();
+      }
+    }
+
+    navigator.serviceWorker?.addEventListener("message", manejarMensaje);
+
+    return () => {
+      navigator.serviceWorker?.removeEventListener("message", manejarMensaje);
+    };
+  }, []);
+
   const esTrabajo = modo === "trabajo";
 
   const textoBotonPrincipal = esTrabajo
@@ -1010,6 +1036,8 @@ function Temporizador({ actualizarDatos }) {
           <h1>{formatearTiempo(tiempoRestante)}</h1>
         )}
       </div>
+
+      <button onClick={probarNotificacion}>Probar notificación</button>
 
       <div className="acciones-temporizador">
         {!activo && !pausado && (
