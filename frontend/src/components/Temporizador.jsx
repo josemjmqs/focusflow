@@ -15,6 +15,8 @@ function Temporizador({ actualizarDatos }) {
   });
   const [inicioTiempoExtra, setInicioTiempoExtra] = useState(null);
   const activoRef = useRef(false);
+  const idSesionRef = useRef(null);
+  const inicioTemporizadorRef = useRef(null);
   const contextoAudio = useRef(null);
   const oscilador = useRef(null);
   const ganancia = useRef(null);
@@ -168,15 +170,12 @@ function Temporizador({ actualizarDatos }) {
     localStorage.removeItem("estadoDescanso");
   }
 
-  function calcularSegundosTranscurridos() {
-    if (!inicioTemporizador) {
+  function calcularSegundosTranscurridos(inicio = inicioTemporizador) {
+    if (!inicio) {
       return tiempoAcumulado;
     }
 
-    return (
-      tiempoAcumulado +
-      Math.floor((Date.now() - inicioTemporizador.getTime()) / 1000)
-    );
+    return tiempoAcumulado + Math.floor((Date.now() - inicio.getTime()) / 1000);
   }
 
   function calcularSegundosExtraTranscurridos() {
@@ -280,9 +279,11 @@ function Temporizador({ actualizarDatos }) {
     localStorage.removeItem("modoTemporizador");
 
     setIdSesion(sesion.id);
+    idSesionRef.current = sesion.id;
 
     setInicioSesion(fechaInicio);
     setInicioTemporizador(fechaInicio);
+    inicioTemporizadorRef.current = fechaInicio;
     setTiempoAcumulado(0);
     setDuracionActual(duracion);
 
@@ -315,6 +316,8 @@ function Temporizador({ actualizarDatos }) {
     setTiempoAcumulado(0);
     setDuracionActual(0);
     setIdSesion(null);
+    idSesionRef.current = null;
+    inicioTemporizadorRef.current = null;
 
     actualizarDatos();
     console.log("terminarTrabajo terminado");
@@ -404,6 +407,7 @@ function Temporizador({ actualizarDatos }) {
           setIdSesion(sesion.id);
           setInicioSesion(inicio);
           setInicioTemporizador(inicio);
+          inicioTemporizadorRef.current = inicio;
           setTiempoAcumulado(0);
           setDuracionActual(duracion);
           setModo("trabajo");
@@ -555,12 +559,14 @@ function Temporizador({ actualizarDatos }) {
     setAlarmaActiva(false);
 
     try {
-      const duracion = calcularSegundosTranscurridos();
+      const duracion = calcularSegundosTranscurridos(
+        inicioTemporizadorRef.current,
+      );
 
       console.log("Duración trabajo:", duracion);
-      console.log("Finalizando sesión:", idSesion);
+      console.log("Finalizando sesión:", idSesionRef.current);
 
-      await finalizarSesion(idSesion, duracion);
+      await finalizarSesion(idSesionRef.current, duracion);
 
       actualizarDatos();
 
@@ -572,6 +578,8 @@ function Temporizador({ actualizarDatos }) {
       setTiempoAcumulado(0);
       setDuracionActual(0);
       setIdSesion(null);
+      idSesionRef.current = null;
+      inicioTemporizadorRef.current = null;
 
       // Calcular qué descanso corresponde
       const configuracion = obtenerConfiguracionPomodoro();
