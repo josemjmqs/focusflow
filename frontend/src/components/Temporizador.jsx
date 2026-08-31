@@ -74,6 +74,7 @@ function Temporizador({ actualizarDatos }) {
       body: mensaje,
       icon: "/pwa-192x192.png",
       badge: "/pwa-192x192.png",
+      tag: "focusflow-temporizador",
 
       actions: [
         {
@@ -83,6 +84,14 @@ function Temporizador({ actualizarDatos }) {
         {
           action: "seguir-concentrado",
           title: "🧑‍💻 Seguir concentrado",
+        },
+        {
+          action: "iniciar-trabajo",
+          title: "🧑‍💻 Iniciar concentración",
+        },
+        {
+          action: "seguir-descansando",
+          title: "🧘 Seguir descansando",
         },
       ],
     });
@@ -99,6 +108,7 @@ function Temporizador({ actualizarDatos }) {
       body: mensaje,
       icon: "/pwa-192x192.png",
       badge: "/pwa-192x192.png",
+      tag: "focusflow-temporizador",
     });
   }
 
@@ -1001,6 +1011,14 @@ function Temporizador({ actualizarDatos }) {
 
       if (event.data.accion === "seguir-concentrado") {
         seguirTrabajando();
+      }
+
+      if (event.data.accion === "iniciar-trabajo") {
+        iniciarTrabajo();
+      }
+
+      if (event.data.accion === "seguir-descansando") {
+        seguirDescansando();
       }
     }
 
