@@ -11,7 +11,7 @@ function Temporizador({ actualizarDatos }) {
   const [tiempoRestante, setTiempoRestante] = useState(() => {
     const duracionTrabajo = Number(localStorage.getItem("duracionTrabajo"));
 
-    return duracionTrabajo ? duracionTrabajo * 60 : 25 * 60;
+    return duracionTrabajo || 25;
   });
   const [inicioTiempoExtra, setInicioTiempoExtra] = useState(null);
   const activoRef = useRef(false);
@@ -271,7 +271,7 @@ function Temporizador({ actualizarDatos }) {
 
     const configuracion = obtenerConfiguracionPomodoro();
 
-    const duracion = configuracion.duracionTrabajo * 60;
+    const duracion = configuracion.duracionTrabajo;
 
     const sesion = await crearSesion(duracion);
 
@@ -371,7 +371,7 @@ function Temporizador({ actualizarDatos }) {
 
       // Preparar el próximo trabajo
       const configuracion = obtenerConfiguracionPomodoro();
-      const duracionTrabajo = configuracion.duracionTrabajo * 60;
+      const duracionTrabajo = configuracion.duracionTrabajo;
 
       setTiempoRestante(duracionTrabajo);
 
@@ -604,8 +604,8 @@ function Temporizador({ actualizarDatos }) {
 
       // Calcular duración del descanso
       const duracionDescanso = esDescansoLargo
-        ? configuracion.duracionDescansoLargo * 60
-        : configuracion.duracionDescansoCorto * 60;
+        ? configuracion.duracionDescansoLargo
+        : configuracion.duracionDescansoCorto;
 
       const ahora = new Date();
 

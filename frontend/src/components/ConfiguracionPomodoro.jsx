@@ -17,11 +17,12 @@ function ConfiguracionPomodoro({ volver }) {
     return guardada ? Number(guardada) : 15;
   });
 
-  const [sesionesAntesDescansoLargo, setSesionesAntesDescansoLargo] =
-    useState(() => {
+  const [sesionesAntesDescansoLargo, setSesionesAntesDescansoLargo] = useState(
+    () => {
       const guardada = localStorage.getItem("sesionesAntesDescansoLargo");
       return guardada ? Number(guardada) : 4;
-    });
+    },
+  );
 
   function guardarConfiguracion() {
     localStorage.setItem("duracionTrabajo", duracionTrabajo);
@@ -52,9 +53,7 @@ function ConfiguracionPomodoro({ volver }) {
 
           <div className="configuracion-opcion">
             <div>
-              <label htmlFor="duracionTrabajo">
-                Tiempo de concentración
-              </label>
+              <label htmlFor="duracionTrabajo">Tiempo de concentración</label>
 
               <p>Duración de cada sesión de trabajo.</p>
             </div>
@@ -67,9 +66,7 @@ function ConfiguracionPomodoro({ volver }) {
                 max="180"
                 step="any"
                 value={duracionTrabajo}
-                onChange={(e) =>
-                  setDuracionTrabajo(Number(e.target.value))
-                }
+                onChange={(e) => setDuracionTrabajo(Number(e.target.value))}
               />
 
               <span>min</span>
@@ -82,9 +79,7 @@ function ConfiguracionPomodoro({ volver }) {
 
           <div className="configuracion-opcion">
             <div>
-              <label htmlFor="duracionDescansoCorto">
-                Descanso corto
-              </label>
+              <label htmlFor="duracionDescansoCorto">Descanso corto</label>
 
               <p>Descanso entre sesiones de concentración.</p>
             </div>
@@ -108,9 +103,7 @@ function ConfiguracionPomodoro({ volver }) {
 
           <div className="configuracion-opcion">
             <div>
-              <label htmlFor="duracionDescansoLargo">
-                Descanso largo
-              </label>
+              <label htmlFor="duracionDescansoLargo">Descanso largo</label>
 
               <p>Descanso después de completar el ciclo.</p>
             </div>
@@ -143,8 +136,8 @@ function ConfiguracionPomodoro({ volver }) {
               </label>
 
               <p>
-                Cantidad de sesiones de concentración antes de un
-                descanso largo.
+                Cantidad de sesiones de concentración antes de un descanso
+                largo.
               </p>
             </div>
 
@@ -167,17 +160,11 @@ function ConfiguracionPomodoro({ volver }) {
         </div>
 
         <div className="configuracion-acciones">
-          <button
-            className="boton-secundario"
-            onClick={volver}
-          >
+          <button className="boton-secundario" onClick={volver}>
             Volver
           </button>
 
-          <button
-            className="boton-guardar"
-            onClick={guardarConfiguracion}
-          >
+          <button className="boton-guardar" onClick={guardarConfiguracion}>
             Guardar cambios
           </button>
         </div>

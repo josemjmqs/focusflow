@@ -10,14 +10,13 @@ export function formatearDuracion(segundos = 0) {
   }
 
   if (minutos > 0) {
-    texto += `${minutos} min`;
+    texto += `${minutos} min `;
   }
 
-  // Los segundos solo se muestran si no hay horas ni minutos
-  if (horas === 0 && minutos === 0) {
+  // Los segundos se muestran solo cuando no hay horas
+  if (horas === 0 && segundosRestantes > 0) {
     texto += `${segundosRestantes} s`;
   }
 
   return texto.trim();
 }
-

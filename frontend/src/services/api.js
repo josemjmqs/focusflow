@@ -32,6 +32,7 @@ async function realizarPeticion(url, opciones = {}) {
 
 export const obtenerEstadisticas = async () => {
   return realizarPeticion(`${API_URL}/estadisticas`, {
+    cache: "no-store",
     headers: {
       Authorization: `Bearer ${obtenerToken()}`,
     },

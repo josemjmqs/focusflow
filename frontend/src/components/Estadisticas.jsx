@@ -8,14 +8,43 @@ import "./Estadisticas.css";
 function Estadisticas({ actualizar }) {
   const [datos, setDatos] = useState(null);
 
+  console.log("DATOS ACTUALES:", datos);
+
   useEffect(() => {
-    obtenerEstadisticas()
-      .then((resultado) => {
-        setDatos(resultado);
-      })
-      .catch((error) => {
-        console.error("Error obteniendo estadísticas:", error);
-      });
+    const cargarEstadisticas = () => {
+      console.log("Cargando estadísticas...", new Date().toLocaleTimeString());
+      obtenerEstadisticas()
+        .then((resultado) => {
+          console.log("ESTADÍSTICAS RECIBIDAS:", resultado);
+          setDatos(resultado);
+        })
+        .catch((error) => {
+          console.error("Error obteniendo estadísticas:", error);
+        });
+    };
+
+    cargarEstadisticas();
+
+    const ahora = new Date();
+
+    const proximaMedianoche = new Date(
+      ahora.getFullYear(),
+      ahora.getMonth(),
+      ahora.getDate() + 1,
+      0,
+      0,
+      1,
+    );
+
+    const tiempoHastaMedianoche = proximaMedianoche.getTime() - ahora.getTime();
+
+    const temporizador = setTimeout(() => {
+      cargarEstadisticas();
+    }, tiempoHastaMedianoche);
+
+    return () => {
+      clearTimeout(temporizador);
+    };
   }, [actualizar]);
 
   if (!datos) {
