@@ -1014,7 +1014,7 @@ function Temporizador({ actualizarDatos }) {
       }
 
       if (event.data.accion === "iniciar-trabajo") {
-        iniciarTrabajo();
+        iniciarTemporizador();
       }
 
       if (event.data.accion === "seguir-descansando") {
@@ -1089,7 +1089,11 @@ function Temporizador({ actualizarDatos }) {
             onClick={accionBotonPrincipal}
             disabled={iniciando || iniciandoDescanso}
           >
-            {iniciandoDescanso ? "Iniciando descanso..." : textoBotonPrincipal}
+            {iniciandoDescanso
+              ? "Iniciando descanso..."
+              : iniciando
+                ? "Iniciando concentración..."
+                : textoBotonPrincipal}  
           </button>
 
           <button onClick={accionBotonSecundario}>
