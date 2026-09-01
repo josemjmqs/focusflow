@@ -56,7 +56,7 @@ function Temporizador({ actualizarDatos }) {
   }
 
   async function probarNotificacion() {
-    await mostrarNotificacion("FocusFlow", "Prueba de notificación");
+    await mostrarNotificacion("FocusFlow", "Prueba de notificación", "trabajo");
   }
 
   async function mostrarNotificacion(titulo, mensaje, modoNotificacion) {
