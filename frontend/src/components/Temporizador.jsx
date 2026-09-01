@@ -59,7 +59,7 @@ function Temporizador({ actualizarDatos }) {
     await mostrarNotificacion("FocusFlow", "Prueba de notificación");
   }
 
-  async function mostrarNotificacion(titulo, mensaje) {
+  async function mostrarNotificacion(titulo, mensaje, modoNotificacion) {
     if (Notification.permission !== "granted") {
       return;
     }
@@ -71,7 +71,7 @@ function Temporizador({ actualizarDatos }) {
     const registro = await navigator.serviceWorker.ready;
 
     const acciones =
-      modo === "trabajo"
+      modoNotificacion === "trabajo"
         ? [
             {
               action: "iniciar-descanso",
@@ -234,6 +234,7 @@ function Temporizador({ actualizarDatos }) {
         modo === "trabajo"
           ? "Terminó tu tiempo de concentración 🧑‍💻"
           : "Terminó tu descanso 🧘",
+        modo,
       );
     }
   }
