@@ -70,30 +70,35 @@ function Temporizador({ actualizarDatos }) {
 
     const registro = await navigator.serviceWorker.ready;
 
+    const acciones =
+      modo === "trabajo"
+        ? [
+            {
+              action: "iniciar-descanso",
+              title: "🧘 Iniciar descanso",
+            },
+            {
+              action: "seguir-concentrado",
+              title: "🧑‍💻 Seguir concentrado",
+            },
+          ]
+        : [
+            {
+              action: "iniciar-trabajo",
+              title: "🧑‍💻 Iniciar concentración",
+            },
+            {
+              action: "seguir-descansando",
+              title: "🧘 Seguir descansando",
+            },
+          ];
+
     await registro.showNotification(titulo, {
       body: mensaje,
       icon: "/pwa-192x192.png",
       badge: "/pwa-192x192.png",
       tag: "focusflow-temporizador",
-
-      actions: [
-        {
-          action: "iniciar-descanso",
-          title: "🧘 Iniciar descanso",
-        },
-        {
-          action: "seguir-concentrado",
-          title: "🧑‍💻 Seguir concentrado",
-        },
-        {
-          action: "iniciar-trabajo",
-          title: "🧑‍💻 Iniciar concentración",
-        },
-        {
-          action: "seguir-descansando",
-          title: "🧘 Seguir descansando",
-        },
-      ],
+      actions: acciones,
     });
   }
 
@@ -1005,6 +1010,10 @@ function Temporizador({ actualizarDatos }) {
         return;
       }
 
+      console.log("ACCIÓN DE NOTIFICACIÓN:", event.data.accion);
+      console.log("ID SESIÓN ACTUAL:", idSesionRef.current);
+      console.log("INICIO TEMPORIZADOR ACTUAL:", inicioTemporizadorRef.current);
+
       if (event.data.accion === "iniciar-descanso") {
         iniciarDescanso();
       }
@@ -1093,7 +1102,7 @@ function Temporizador({ actualizarDatos }) {
               ? "Iniciando descanso..."
               : iniciando
                 ? "Iniciando concentración..."
-                : textoBotonPrincipal}  
+                : textoBotonPrincipal}
           </button>
 
           <button onClick={accionBotonSecundario}>
