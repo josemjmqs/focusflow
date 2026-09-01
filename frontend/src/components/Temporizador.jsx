@@ -224,6 +224,11 @@ function Temporizador({ actualizarDatos }) {
   }
 
   function terminarTemporizador(momentoFinalizacion) {
+    console.log("=== TERMINÓ TEMPORIZADOR ===");
+    console.log("Modo:", modo);
+    console.log("document.hidden:", document.hidden);
+    console.log("Permiso:", Notification.permission);
+
     setTiempoRestante(0);
     setTiempoTerminado(true);
     setAlarmaActiva(true);
@@ -248,6 +253,8 @@ function Temporizador({ actualizarDatos }) {
     }
 
     if (document.hidden) {
+      console.log("=== INTENTANDO MOSTRAR NOTIFICACIÓN ===");
+
       mostrarNotificacion(
         "FocusFlow",
         modo === "trabajo"
