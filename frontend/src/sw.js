@@ -44,14 +44,19 @@ self.addEventListener("notificationclick", (event) => {
         type: "window",
         includeUncontrolled: true,
       })
-      .then((clientes) => {
+      .then(async (clientes) => {
+        console.log("CLIENTES ENCONTRADOS:", clientes.length);
+        console.log("ACCIÓN:", accion);
+
         if (clientes.length > 0) {
-          clientes[0].postMessage({
+          const cliente = clientes[0];
+
+          await cliente.focus();
+
+          cliente.postMessage({
             tipo: "accion-notificacion",
             accion,
           });
-
-          return clientes[0].focus();
         }
       }),
   );

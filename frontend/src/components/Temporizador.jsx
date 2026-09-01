@@ -28,6 +28,10 @@ function Temporizador({ actualizarDatos }) {
   const [tiempoTerminado, setTiempoTerminado] = useState(false);
   const [alarmaActiva, setAlarmaActiva] = useState(false);
   const [error, setError] = useState("");
+  const iniciarDescansoRef = useRef(null);
+  const iniciarTemporizadorRef = useRef(null);
+  const seguirTrabajandoRef = useRef(null);
+  const seguirDescansandoRef = useRef(null);
 
   // Sesión
   const [inicioSesion, setInicioSesion] = useState(null);
@@ -703,6 +707,11 @@ function Temporizador({ actualizarDatos }) {
     }
   }
 
+  iniciarDescansoRef.current = iniciarDescanso;
+  iniciarTemporizadorRef.current = iniciarTemporizador;
+  seguirTrabajandoRef.current = seguirTrabajando;
+  seguirDescansandoRef.current = seguirDescansando;
+
   // Effects
   useEffect(() => {
     if (!activo || tiempoTerminado || !inicioTemporizador) {
@@ -1036,24 +1045,25 @@ function Temporizador({ actualizarDatos }) {
         return;
       }
 
-      console.log("ACCIÓN DE NOTIFICACIÓN:", event.data.accion);
-      console.log("ID SESIÓN ACTUAL:", idSesionRef.current);
-      console.log("INICIO TEMPORIZADOR ACTUAL:", inicioTemporizadorRef.current);
+      console.log("=== ACCIÓN DESDE NOTIFICACIÓN ===");
+      console.log("Acción:", event.data.accion);
+      console.log("ID SESIÓN:", idSesionRef.current);
+      console.log("INICIO TEMPORIZADOR:", inicioTemporizadorRef.current);
 
       if (event.data.accion === "iniciar-descanso") {
-        iniciarDescanso();
+        iniciarDescansoRef.current?.();
       }
 
       if (event.data.accion === "seguir-concentrado") {
-        seguirTrabajando();
+        seguirTrabajandoRef.current?.();
       }
 
       if (event.data.accion === "iniciar-trabajo") {
-        iniciarTemporizador();
+        iniciarTemporizadorRef.current?.();
       }
 
       if (event.data.accion === "seguir-descansando") {
-        seguirDescansando();
+        seguirDescansandoRef.current?.();
       }
     }
 
