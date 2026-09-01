@@ -79,46 +79,62 @@ function Temporizador({ actualizarDatos }) {
   }
 
   async function mostrarNotificacion(titulo, mensaje, modoNotificacion) {
+    console.log("=== INTENTANDO MOSTRAR NOTIFICACIÓN ===");
+
     if (Notification.permission !== "granted") {
+      console.log("❌ Permiso no concedido");
       return;
     }
 
     if (!("serviceWorker" in navigator)) {
+      console.log("❌ Service Worker no disponible");
       return;
     }
 
-    const registro = await navigator.serviceWorker.ready;
+    console.log("⏳ Esperando Service Worker...");
 
-    const acciones =
-      modoNotificacion === "trabajo"
-        ? [
-            {
-              action: "iniciar-descanso",
-              title: "🧘 Iniciar descanso",
-            },
-            {
-              action: "seguir-concentrado",
-              title: "🧑‍💻 Seguir concentrado",
-            },
-          ]
-        : [
-            {
-              action: "iniciar-trabajo",
-              title: "🧑‍💻 Iniciar concentración",
-            },
-            {
-              action: "seguir-descansando",
-              title: "🧘 Seguir descansando",
-            },
-          ];
+    try {
+      const registro = await navigator.serviceWorker.ready;
 
-    await registro.showNotification(titulo, {
-      body: mensaje,
-      icon: "/pwa-192x192.png",
-      badge: "/pwa-192x192.png",
-      tag: "focusflow-temporizador",
-      actions: acciones,
-    });
+      console.log("✅ Service Worker listo:", registro);
+
+      const acciones =
+        modoNotificacion === "trabajo"
+          ? [
+              {
+                action: "iniciar-descanso",
+                title: "🧘 Iniciar descanso",
+              },
+              {
+                action: "seguir-concentrado",
+                title: "🧑‍💻 Seguir concentrado",
+              },
+            ]
+          : [
+              {
+                action: "iniciar-trabajo",
+                title: "🧑‍💻 Iniciar concentración",
+              },
+              {
+                action: "seguir-descansando",
+                title: "🧘 Seguir descansando",
+              },
+            ];
+
+      console.log("Acciones:", acciones);
+
+      await registro.showNotification(titulo, {
+        body: mensaje,
+        icon: "/pwa-192x192.png",
+        badge: "/pwa-192x192.png",
+        tag: "focusflow-temporizador",
+        actions: acciones,
+      });
+
+      console.log("✅ NOTIFICACIÓN MOSTRADA");
+    } catch (error) {
+      console.error("❌ ERROR MOSTRANDO NOTIFICACIÓN:", error);
+    }
   }
 
   async function mostrarNotificacionSistema(titulo, mensaje) {
