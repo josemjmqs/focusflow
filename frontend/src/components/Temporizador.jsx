@@ -56,7 +56,26 @@ function Temporizador({ actualizarDatos }) {
   }
 
   async function probarNotificacion() {
-    await mostrarNotificacion("FocusFlow", "Prueba de notificación", "trabajo");
+    console.log("=== PRUEBA NOTIFICACIÓN ===");
+    console.log("Permiso:", Notification.permission);
+    console.log("Service Worker:", "serviceWorker" in navigator);
+
+    try {
+      const registro = await navigator.serviceWorker.ready;
+
+      console.log("Service Worker listo:", registro);
+
+      await registro.showNotification("FocusFlow", {
+        body: "Prueba de notificación",
+        icon: "/pwa-192x192.png",
+        badge: "/pwa-192x192.png",
+        tag: "focusflow-prueba",
+      });
+
+      console.log("=== NOTIFICACIÓN ENVIADA ===");
+    } catch (error) {
+      console.error("=== ERROR NOTIFICACIÓN ===", error);
+    }
   }
 
   async function mostrarNotificacion(titulo, mensaje, modoNotificacion) {
