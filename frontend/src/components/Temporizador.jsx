@@ -127,7 +127,7 @@ function Temporizador({ actualizarDatos }) {
         body: mensaje,
         icon: "/pwa-192x192.png",
         badge: "/pwa-192x192.png",
-        tag: "focusflow-temporizador",
+        tag: `focusflow-${Date.now()}`,
         actions: acciones,
       });
 
