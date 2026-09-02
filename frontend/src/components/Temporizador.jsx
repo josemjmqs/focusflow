@@ -90,22 +90,22 @@ function Temporizador({ actualizarDatos }) {
         modoNotificacion === "trabajo"
           ? [
               {
-                action: "iniciar-descanso",
-                title: "🧘 Iniciar descanso",
-              },
-              {
                 action: "seguir-concentrado",
                 title: "🧑‍💻 Seguir concentrado",
+              },
+              {
+                action: "iniciar-descanso",
+                title: "🧘 Iniciar descanso",
               },
             ]
           : [
               {
-                action: "iniciar-trabajo",
-                title: "🧑‍💻 Iniciar concentración",
-              },
-              {
                 action: "seguir-descansando",
                 title: "🧘 Seguir descansando",
+              },
+              {
+                action: "iniciar-trabajo",
+                title: "🧑‍💻 Iniciar concentración",
               },
             ];
 
