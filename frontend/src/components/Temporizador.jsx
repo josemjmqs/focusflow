@@ -144,17 +144,43 @@ function Temporizador({ actualizarDatos }) {
   }
 
   function obtenerConfiguracionPomodoro() {
+    const token = localStorage.getItem("token");
+
+    let idUsuario = null;
+
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        idUsuario = payload.id;
+      } catch {
+        idUsuario = null;
+      }
+    }
+
+    if (!idUsuario) {
+      return {
+        duracionTrabajo: 25,
+        duracionDescansoCorto: 5,
+        duracionDescansoLargo: 15,
+        sesionesAntesDescansoLargo: 4,
+      };
+    }
+
     return {
-      duracionTrabajo: Number(localStorage.getItem("duracionTrabajo")) || 25,
+      duracionTrabajo:
+        Number(localStorage.getItem(`duracionTrabajo_${idUsuario}`)) || 25,
 
       duracionDescansoCorto:
-        Number(localStorage.getItem("duracionDescansoCorto")) || 5,
+        Number(localStorage.getItem(`duracionDescansoCorto_${idUsuario}`)) || 5,
 
       duracionDescansoLargo:
-        Number(localStorage.getItem("duracionDescansoLargo")) || 15,
+        Number(localStorage.getItem(`duracionDescansoLargo_${idUsuario}`)) ||
+        15,
 
       sesionesAntesDescansoLargo:
-        Number(localStorage.getItem("sesionesAntesDescansoLargo")) || 4,
+        Number(
+          localStorage.getItem(`sesionesAntesDescansoLargo_${idUsuario}`),
+        ) || 4,
     };
   }
 

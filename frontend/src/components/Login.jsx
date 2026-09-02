@@ -10,6 +10,8 @@ function Login({ onLogin, crearCuenta }) {
     try {
       const respuesta = await login(email, password);
 
+      console.log("RESPUESTA LOGIN:", JSON.stringify(respuesta));
+
       localStorage.setItem("token", respuesta.token);
 
       onLogin();

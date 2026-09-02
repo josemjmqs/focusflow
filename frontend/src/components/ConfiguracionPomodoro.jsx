@@ -24,12 +24,39 @@ function ConfiguracionPomodoro({ volver }) {
     },
   );
 
+  function obtenerIdUsuario() {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      return null;
+    }
+
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.id;
+    } catch {
+      return null;
+    }
+  }
+
   function guardarConfiguracion() {
-    localStorage.setItem("duracionTrabajo", duracionTrabajo);
-    localStorage.setItem("duracionDescansoCorto", duracionDescansoCorto);
-    localStorage.setItem("duracionDescansoLargo", duracionDescansoLargo);
+    const idUsuario = obtenerIdUsuario();
+
+    if (!idUsuario) {
+      return;
+    }
+
+    localStorage.setItem(`duracionTrabajo_${idUsuario}`, duracionTrabajo);
     localStorage.setItem(
-      "sesionesAntesDescansoLargo",
+      `duracionDescansoCorto_${idUsuario}`,
+      duracionDescansoCorto,
+    );
+    localStorage.setItem(
+      `duracionDescansoLargo_${idUsuario}`,
+      duracionDescansoLargo,
+    );
+    localStorage.setItem(
+      `sesionesAntesDescansoLargo_${idUsuario}`,
       sesionesAntesDescansoLargo,
     );
 
