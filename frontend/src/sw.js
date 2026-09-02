@@ -33,10 +33,22 @@ self.addEventListener("push", (event) => {
   );
 });
 
+self.addEventListener("message", (event) => {
+  if (event.data?.tipo !== "obtener-client-id") {
+    return;
+  }
+
+  event.ports[0]?.postMessage({
+    tipo: "client-id",
+    clientId: event.source.id,
+  });
+});
+
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
   const accion = event.action;
+  const clientId = event.notification.data?.clientId;
 
   event.waitUntil(
     self.clients
@@ -47,17 +59,21 @@ self.addEventListener("notificationclick", (event) => {
       .then(async (clientes) => {
         console.log("CLIENTES ENCONTRADOS:", clientes.length);
         console.log("ACCIÓN:", accion);
+        console.log("CLIENT ID:", clientId);
 
-        if (clientes.length > 0) {
-          const cliente = clientes[0];
+        const cliente = clientes.find((cliente) => cliente.id === clientId);
 
-          await cliente.focus();
-
-          cliente.postMessage({
-            tipo: "accion-notificacion",
-            accion,
-          });
+        if (!cliente) {
+          console.log("❌ No se encontró el cliente de la notificación");
+          return;
         }
+
+        await cliente.focus();
+
+        cliente.postMessage({
+          tipo: "accion-notificacion",
+          accion,
+        });
       }),
   );
 });

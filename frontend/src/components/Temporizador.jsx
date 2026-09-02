@@ -32,6 +32,7 @@ function Temporizador({ actualizarDatos }) {
   const iniciarTemporizadorRef = useRef(null);
   const seguirTrabajandoRef = useRef(null);
   const seguirDescansandoRef = useRef(null);
+  const clientIdRef = useRef(null);
 
   // Sesión
   const [inicioSesion, setInicioSesion] = useState(null);
@@ -116,6 +117,9 @@ function Temporizador({ actualizarDatos }) {
         badge: "/pwa-192x192.png",
         tag: `focusflow-${Date.now()}`,
         actions: acciones,
+        data: {
+          clientId: clientIdRef.current,
+        },
       });
 
       console.log("✅ NOTIFICACIÓN MOSTRADA");
@@ -1072,6 +1076,29 @@ function Temporizador({ actualizarDatos }) {
     return () => {
       navigator.serviceWorker?.removeEventListener("message", manejarMensaje);
     };
+  }, []);
+
+  useEffect(() => {
+    if (!navigator.serviceWorker?.controller) {
+      return;
+    }
+
+    const canal = new MessageChannel();
+
+    canal.port1.onmessage = (event) => {
+      if (event.data?.tipo === "client-id") {
+        clientIdRef.current = event.data.clientId;
+
+        console.log("CLIENT ID ACTUAL:", clientIdRef.current);
+      }
+    };
+
+    navigator.serviceWorker.controller.postMessage(
+      {
+        tipo: "obtener-client-id",
+      },
+      [canal.port2],
+    );
   }, []);
 
   const esTrabajo = modo === "trabajo";
