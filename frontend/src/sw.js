@@ -58,7 +58,8 @@ self.addEventListener("notificationclick", (event) => {
       })
       .then(async (clientes) => {
         console.log("CLIENTES ENCONTRADOS:", clientes.length);
-        console.log("ACCIÓN:", accion);
+        console.log("ACCIÓN RECIBIDA:", accion);
+        console.log("ACCIONES DE LA NOTIFICACIÓN:", event.notification.actions);
         console.log("CLIENT ID:", clientId);
 
         const cliente = clientes.find((cliente) => cliente.id === clientId);
