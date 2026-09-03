@@ -90,19 +90,11 @@ function Temporizador({ actualizarDatos }) {
         modoNotificacion === "trabajo"
           ? [
               {
-                action: "seguir-concentrado",
-                title: "🧑‍💻 Seguir concentrado",
-              },
-              {
                 action: "iniciar-descanso",
                 title: "🧘 Iniciar descanso",
               },
             ]
           : [
-              {
-                action: "seguir-descansando",
-                title: "🧘 Seguir descansando",
-              },
               {
                 action: "iniciar-trabajo",
                 title: "🧑‍💻 Iniciar concentración",
@@ -1084,16 +1076,8 @@ function Temporizador({ actualizarDatos }) {
         iniciarDescansoRef.current?.();
       }
 
-      if (event.data.accion === "seguir-concentrado") {
-        seguirTrabajandoRef.current?.();
-      }
-
       if (event.data.accion === "iniciar-trabajo") {
         iniciarTemporizadorRef.current?.();
-      }
-
-      if (event.data.accion === "seguir-descansando") {
-        seguirDescansandoRef.current?.();
       }
     }
 
