@@ -108,6 +108,7 @@ function Temporizador({ actualizarDatos }) {
         icon: "/pwa-192x192.png",
         badge: "/pwa-192x192.png",
         tag: `focusflow-${Date.now()}`,
+        requireInteraction: true,
         actions: acciones,
         data: {
           clientId: clientIdRef.current,
