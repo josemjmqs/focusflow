@@ -63,40 +63,41 @@
 
 .botones-configuracion-sonido {
   display: flex;
-  justify-content: space-between;
   gap: 10px;
   margin-top: 25px;
 }
 
 .botones-configuracion-sonido button {
-  flex: 1;
-  padding: 12px;
+  flex: 1 1 0;
+  width: 0;
+  min-width: 0;
+  height: 44px;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
   border-radius: 8px;
-  border: none;
   cursor: pointer;
+  font-family: inherit;
   font-size: 15px;
-}
-
-.boton-volver {
-  background-color: #e5e5e5;
-}
-
-.boton-guardar {
-  background-color: #333;
-  color: white;
+  line-height: normal;
 }
 
 .boton-probar-sonido {
-  width: 100%;
-  margin-bottom: 10px;
-  padding: 12px;
   border: 1px solid #ddd;
-  border-radius: 8px;
   background-color: white;
-  cursor: pointer;
-  font-size: 15px;
 }
 
 .boton-probar-sonido:hover {
   background-color: #f7f7f7;
+}
+
+.boton-volver {
+  border: 1px solid #ddd;
+  background-color: #e5e5e5;
+}
+
+.boton-guardar {
+  border: 1px solid #333;
+  background-color: #333;
+  color: white;
 }
