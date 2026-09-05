@@ -109,6 +109,7 @@ function Temporizador({ actualizarDatos }) {
         badge: "/pwa-192x192.png",
         tag: `focusflow-${Date.now()}`,
         requireInteraction: true,
+        silent: true,
         actions: acciones,
         data: {
           clientId: clientIdRef.current,
@@ -258,6 +259,7 @@ function Temporizador({ actualizarDatos }) {
     setTiempoRestante(0);
     setTiempoTerminado(true);
     setAlarmaActiva(true);
+    reproducirAlarma();
     setInicioTiempoExtra(momentoFinalizacion);
 
     if (modo === "descanso") {
