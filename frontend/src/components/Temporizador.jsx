@@ -9,9 +9,24 @@ import "./Temporizador.css";
 function Temporizador({ actualizarDatos }) {
   // Temporizador
   const [tiempoRestante, setTiempoRestante] = useState(() => {
-    const duracionTrabajo = Number(localStorage.getItem("duracionTrabajo"));
+    const token = localStorage.getItem("token");
 
-    return duracionTrabajo ? duracionTrabajo * 60 : 25 * 60;
+    if (!token) {
+      return 25 * 60;
+    }
+
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      const idUsuario = payload.id;
+
+      const duracionTrabajo = Number(
+        localStorage.getItem(`duracionTrabajo_${idUsuario}`),
+      );
+
+      return duracionTrabajo ? duracionTrabajo * 60 : 25 * 60;
+    } catch {
+      return 25 * 60;
+    }
   });
   const [inicioTiempoExtra, setInicioTiempoExtra] = useState(null);
   const activoRef = useRef(false);
