@@ -41,43 +41,56 @@ function ConfiguracionSonido({ volver }) {
     }
 
     const contexto = new AudioContext();
-    const oscilador = contexto.createOscillator();
-    const ganancia = contexto.createGain();
 
-    oscilador.connect(ganancia);
-    ganancia.connect(contexto.destination);
+    function reproducirTono(frecuencia, inicio, duracion, tipo = "sine") {
+      const oscilador = contexto.createOscillator();
+      const ganancia = contexto.createGain();
+
+      oscilador.connect(ganancia);
+      ganancia.connect(contexto.destination);
+
+      oscilador.frequency.value = frecuencia;
+      oscilador.type = tipo;
+
+      ganancia.gain.setValueAtTime(0.3, contexto.currentTime + inicio);
+      ganancia.gain.exponentialRampToValueAtTime(
+        0.01,
+        contexto.currentTime + inicio + duracion,
+      );
+
+      oscilador.start(contexto.currentTime + inicio);
+      oscilador.stop(contexto.currentTime + inicio + duracion);
+    }
 
     switch (sonidoSeleccionado) {
       case "suave":
-        oscilador.frequency.value = 500;
-        oscilador.type = "sine";
+        reproducirTono(500, 0, 0.6);
+        reproducirTono(650, 0.7, 0.6);
         break;
 
       case "digital":
-        oscilador.frequency.value = 1000;
-        oscilador.type = "square";
+        reproducirTono(1000, 0, 0.15, "square");
+        reproducirTono(1000, 0.2, 0.15, "square");
+        reproducirTono(1200, 0.4, 0.15, "square");
+        reproducirTono(1000, 0.6, 0.15, "square");
         break;
 
       case "campana":
-        oscilador.frequency.value = 1200;
-        oscilador.type = "triangle";
+        reproducirTono(1200, 0, 1, "triangle");
+        reproducirTono(800, 0.1, 1.2, "triangle");
         break;
 
       case "clasico":
       default:
-        oscilador.frequency.value = 800;
-        oscilador.type = "sine";
+        reproducirTono(800, 0, 0.4);
+        reproducirTono(800, 0.5, 0.4);
+        reproducirTono(1000, 1, 0.6);
         break;
     }
 
-    ganancia.gain.value = 0.3;
-
-    oscilador.start();
-
     setTimeout(() => {
-      oscilador.stop();
       contexto.close();
-    }, 500);
+    }, 2500);
   }
 
   function guardarConfiguracion() {
@@ -123,7 +136,7 @@ function ConfiguracionSonido({ volver }) {
           <button className="boton-probar-sonido" onClick={probarSonido}>
             ▶ Probar sonido
           </button>
-          
+
           <button className="boton-volver" onClick={volver}>
             Volver
           </button>
