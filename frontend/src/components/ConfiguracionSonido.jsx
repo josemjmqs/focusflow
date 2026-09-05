@@ -52,14 +52,14 @@ function ConfiguracionSonido({ volver }) {
       oscilador.frequency.value = frecuencia;
       oscilador.type = tipo;
 
-      ganancia.gain.setValueAtTime(0.3, contexto.currentTime + inicio);
-      ganancia.gain.exponentialRampToValueAtTime(
-        0.01,
-        contexto.currentTime + inicio + duracion,
-      );
+      const tiempoInicio = contexto.currentTime + inicio;
 
-      oscilador.start(contexto.currentTime + inicio);
-      oscilador.stop(contexto.currentTime + inicio + duracion);
+      ganancia.gain.setValueAtTime(0.3, tiempoInicio);
+
+      ganancia.gain.exponentialRampToValueAtTime(0.01, tiempoInicio + duracion);
+
+      oscilador.start(tiempoInicio);
+      oscilador.stop(tiempoInicio + duracion);
     }
 
     switch (sonidoSeleccionado) {

@@ -35,6 +35,7 @@ function Temporizador({ actualizarDatos }) {
   const contextoAudio = useRef(null);
   const oscilador = useRef(null);
   const ganancia = useRef(null);
+  const intervaloAlarma = useRef(null);
 
   // Estado
   const [modo, setModo] = useState("trabajo");
@@ -343,46 +344,77 @@ function Temporizador({ actualizarDatos }) {
 
     contextoAudio.current = new AudioContext();
 
-    oscilador.current = contextoAudio.current.createOscillator();
-    ganancia.current = contextoAudio.current.createGain();
+    function reproducirTono(frecuencia, inicio, duracion, tipo = "sine") {
+      const osciladorTono = contextoAudio.current.createOscillator();
+      const gananciaTono = contextoAudio.current.createGain();
 
-    oscilador.current.connect(ganancia.current);
-    ganancia.current.connect(contextoAudio.current.destination);
+      osciladorTono.connect(gananciaTono);
+      gananciaTono.connect(contextoAudio.current.destination);
 
-    switch (sonidoSeleccionado) {
-      case "suave":
-        oscilador.current.frequency.value = 500;
-        oscilador.current.type = "sine";
-        break;
+      osciladorTono.frequency.value = frecuencia;
+      osciladorTono.type = tipo;
 
-      case "digital":
-        oscilador.current.frequency.value = 1000;
-        oscilador.current.type = "square";
-        break;
+      const tiempoInicio = contextoAudio.current.currentTime + inicio;
 
-      case "campana":
-        oscilador.current.frequency.value = 1200;
-        oscilador.current.type = "triangle";
-        break;
+      gananciaTono.gain.setValueAtTime(0.3, tiempoInicio);
 
-      case "clasico":
-      default:
-        oscilador.current.frequency.value = 800;
-        oscilador.current.type = "sine";
-        break;
+      gananciaTono.gain.exponentialRampToValueAtTime(
+        0.01,
+        tiempoInicio + duracion,
+      );
+
+      osciladorTono.start(tiempoInicio);
+      osciladorTono.stop(tiempoInicio + duracion);
     }
 
-    ganancia.current.gain.value = 0.3;
+    function reproducirSecuencia() {
+      if (!contextoAudio.current) {
+        return;
+      }
 
-    oscilador.current.start();
+      switch (sonidoSeleccionado) {
+        case "suave":
+          reproducirTono(500, 0, 0.6);
+          reproducirTono(650, 0.7, 0.6);
+          break;
+
+        case "digital":
+          reproducirTono(1000, 0, 0.15, "square");
+          reproducirTono(1000, 0.2, 0.15, "square");
+          reproducirTono(1200, 0.4, 0.15, "square");
+          reproducirTono(1000, 0.6, 0.15, "square");
+          break;
+
+        case "campana":
+          reproducirTono(1200, 0, 1, "triangle");
+          reproducirTono(800, 0.1, 1.2, "triangle");
+          break;
+
+        case "clasico":
+        default:
+          reproducirTono(800, 0, 0.4);
+          reproducirTono(800, 0.5, 0.4);
+          reproducirTono(1000, 1, 0.6);
+          break;
+      }
+    }
+
+    reproducirSecuencia();
+
+    intervaloAlarma.current = setInterval(() => {
+      reproducirSecuencia();
+    }, 2500);
   }
 
   function detenerAlarma() {
+    if (intervaloAlarma.current) {
+      clearInterval(intervaloAlarma.current);
+      intervaloAlarma.current = null;
+    }
+
     if (!contextoAudio.current) {
       return;
     }
-
-    oscilador.current.stop();
 
     contextoAudio.current.close();
 
