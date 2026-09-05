@@ -1,0 +1,102 @@
+.configuracion-sonido {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px;
+  box-sizing: border-box;
+}
+
+.configuracion-sonido-contenedor {
+  width: 100%;
+  max-width: 500px;
+}
+
+.configuracion-sonido-contenedor h2 {
+  margin: 0 0 10px;
+  text-align: center;
+}
+
+.configuracion-sonido-descripcion {
+  margin: 0 0 25px;
+  text-align: center;
+  color: #666;
+}
+
+.opciones-sonido {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.opcion-sonido {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: white;
+  cursor: pointer;
+  font-size: 16px;
+  text-align: left;
+}
+
+.opcion-sonido:hover {
+  background-color: #f7f7f7;
+}
+
+.opcion-sonido.seleccionada {
+  border: 2px solid #333;
+}
+
+.opcion-sonido-emoji {
+  font-size: 22px;
+}
+
+.opcion-sonido-check {
+  margin-left: auto;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.botones-configuracion-sonido {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.botones-configuracion-sonido button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.boton-volver {
+  background-color: #e5e5e5;
+}
+
+.boton-guardar {
+  background-color: #333;
+  color: white;
+}
+
+.boton-probar-sonido {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: white;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.boton-probar-sonido:hover {
+  background-color: #f7f7f7;
+}

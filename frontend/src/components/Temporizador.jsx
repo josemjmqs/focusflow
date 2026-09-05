@@ -320,6 +320,27 @@ function Temporizador({ actualizarDatos }) {
       return;
     }
 
+    const token = localStorage.getItem("token");
+
+    let idUsuario = null;
+
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        idUsuario = payload.id;
+      } catch {
+        idUsuario = null;
+      }
+    }
+
+    const sonidoSeleccionado = idUsuario
+      ? localStorage.getItem(`sonidoAlarma_${idUsuario}`) || "clasico"
+      : "clasico";
+
+    if (sonidoSeleccionado === "silencioso") {
+      return;
+    }
+
     contextoAudio.current = new AudioContext();
 
     oscilador.current = contextoAudio.current.createOscillator();
@@ -328,8 +349,28 @@ function Temporizador({ actualizarDatos }) {
     oscilador.current.connect(ganancia.current);
     ganancia.current.connect(contextoAudio.current.destination);
 
-    oscilador.current.frequency.value = 800;
-    oscilador.current.type = "sine";
+    switch (sonidoSeleccionado) {
+      case "suave":
+        oscilador.current.frequency.value = 500;
+        oscilador.current.type = "sine";
+        break;
+
+      case "digital":
+        oscilador.current.frequency.value = 1000;
+        oscilador.current.type = "square";
+        break;
+
+      case "campana":
+        oscilador.current.frequency.value = 1200;
+        oscilador.current.type = "triangle";
+        break;
+
+      case "clasico":
+      default:
+        oscilador.current.frequency.value = 800;
+        oscilador.current.type = "sine";
+        break;
+    }
 
     ganancia.current.gain.value = 0.3;
 

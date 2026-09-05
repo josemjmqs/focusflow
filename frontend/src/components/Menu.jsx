@@ -1,8 +1,18 @@
 import { useState } from "react";
 import "./Menu.css";
 
-function Menu({ mostrarHistorial, mostrarConfiguracion, cerrarSesion }) {
+function Menu({
+  mostrarHistorial,
+  mostrarConfiguracion,
+  mostrarSonidoAlarma,
+  cerrarSesion,
+}) {
   const [abierto, setAbierto] = useState(false);
+
+  function manejarSonidoAlarma() {
+    mostrarSonidoAlarma();
+    setAbierto(false);
+  }
 
   function manejarHistorial() {
     mostrarHistorial();
@@ -28,6 +38,7 @@ function Menu({ mostrarHistorial, mostrarConfiguracion, cerrarSesion }) {
         <div className="menu-desplegable">
           <button onClick={manejarHistorial}>Historial</button>
           <button onClick={mostrarConfiguracion}>Configuración Pomodoro</button>
+          <button onClick={manejarSonidoAlarma}>Sonido de alarma</button>
           <button onClick={manejarCerrarSesion}>Cerrar sesión</button>
         </div>
       )}

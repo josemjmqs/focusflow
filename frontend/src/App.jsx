@@ -5,6 +5,7 @@ import Login from "./components/Login";
 import Registro from "./components/Registro";
 import Menu from "./components/Menu";
 import ConfiguracionPomodoro from "./components/ConfiguracionPomodoro";
+import ConfiguracionSonido from "./components/ConfiguracionSonido";
 import { useState } from "react";
 import "./App.css";
 
@@ -18,6 +19,9 @@ function App() {
   );
 
   const [mostrarConfiguracion, setMostrarConfiguracion] = useState(false);
+
+  const [mostrarConfiguracionSonido, setMostrarConfiguracionSonido] =
+    useState(false);
 
   const [mostrarHistorial, setMostrarHistorial] = useState(false);
 
@@ -58,6 +62,14 @@ function App() {
     );
   }
 
+  if (mostrarConfiguracionSonido) {
+    return (
+      <ConfiguracionSonido
+        volver={() => setMostrarConfiguracionSonido(false)}
+      />
+    );
+  }
+
   if (mostrarHistorial) {
     return (
       <div className="pagina-historial">
@@ -88,6 +100,7 @@ function App() {
         <Menu
           mostrarHistorial={() => setMostrarHistorial(true)}
           mostrarConfiguracion={() => setMostrarConfiguracion(true)}
+          mostrarSonidoAlarma={() => setMostrarConfiguracionSonido(true)}
           cerrarSesion={cerrarSesion}
         />
       </div>
