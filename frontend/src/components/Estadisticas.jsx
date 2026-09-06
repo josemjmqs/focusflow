@@ -13,6 +13,7 @@ function Estadisticas({ actualizar }) {
   useEffect(() => {
     const cargarEstadisticas = () => {
       console.log("Cargando estadísticas...", new Date().toLocaleTimeString());
+
       obtenerEstadisticas()
         .then((resultado) => {
           console.log("ESTADÍSTICAS RECIBIDAS:", resultado);
@@ -23,24 +24,31 @@ function Estadisticas({ actualizar }) {
         });
     };
 
+    let temporizador;
+
+    const programarProximaMedianoche = () => {
+      const ahora = new Date();
+
+      const proximaMedianoche = new Date(
+        ahora.getFullYear(),
+        ahora.getMonth(),
+        ahora.getDate() + 1,
+        0,
+        0,
+        1,
+      );
+
+      const tiempoHastaMedianoche =
+        proximaMedianoche.getTime() - ahora.getTime();
+
+      temporizador = setTimeout(() => {
+        cargarEstadisticas();
+        programarProximaMedianoche();
+      }, tiempoHastaMedianoche);
+    };
+
     cargarEstadisticas();
-
-    const ahora = new Date();
-
-    const proximaMedianoche = new Date(
-      ahora.getFullYear(),
-      ahora.getMonth(),
-      ahora.getDate() + 1,
-      0,
-      0,
-      1,
-    );
-
-    const tiempoHastaMedianoche = proximaMedianoche.getTime() - ahora.getTime();
-
-    const temporizador = setTimeout(() => {
-      cargarEstadisticas();
-    }, tiempoHastaMedianoche);
+    programarProximaMedianoche();
 
     return () => {
       clearTimeout(temporizador);
