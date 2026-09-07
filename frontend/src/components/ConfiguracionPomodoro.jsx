@@ -65,6 +65,37 @@ function ConfiguracionPomodoro({ volver }) {
     },
   );
 
+  const [duracionTrabajoInput, setDuracionTrabajoInput] = useState(() => {
+    if (!idUsuario) {
+      return "25";
+    }
+
+    const segundos =
+      Number(localStorage.getItem(`duracionTrabajo_${idUsuario}`)) || 25 * 60;
+
+    return String(segundosAMinutos(segundos));
+  });
+
+  const [duracionDescansoCortoInput, setDuracionDescansoCortoInput] = useState(
+    () => {
+      const segundos =
+        Number(localStorage.getItem(`duracionDescansoCorto_${idUsuario}`)) ||
+        5 * 60;
+
+      return String(segundosAMinutos(segundos));
+    },
+  );
+
+  const [duracionDescansoLargoInput, setDuracionDescansoLargoInput] = useState(
+    () => {
+      const segundos =
+        Number(localStorage.getItem(`duracionDescansoLargo_${idUsuario}`)) ||
+        15 * 60;
+
+      return String(segundosAMinutos(segundos));
+    },
+  );
+
   console.log("duracionTrabajo:", duracionTrabajo);
   console.log("mostrado:", segundosAMinutos(duracionTrabajo));
 
@@ -165,25 +196,70 @@ function ConfiguracionPomodoro({ volver }) {
             </div>
 
             <div className="configuracion-input">
-              <input
-                id="duracionTrabajo"
-                type="number"
-                min="0.0166666667"
-                max="180"
-                step="0.0166666667"
-                value={
-                  duracionTrabajo === ""
-                    ? ""
-                    : segundosAMinutos(duracionTrabajo)
-                }
-                onChange={(e) =>
-                  setDuracionTrabajo(
-                    e.target.value === ""
-                      ? ""
-                      : minutosASegundos(Number(e.target.value)),
-                  )
-                }
-              />
+              <div className="campo-duracion">
+                <input
+                  id="duracionTrabajo"
+                  type="number"
+                  min="0.0166666667"
+                  max="180"
+                  step="any"
+                  value={duracionTrabajoInput}
+                  onChange={(e) => {
+                    const valor = e.target.value;
+
+                    setDuracionTrabajoInput(valor);
+
+                    if (valor === "") {
+                      setDuracionTrabajo("");
+                      return;
+                    }
+
+                    setDuracionTrabajo(minutosASegundos(Number(valor)));
+                  }}
+                />
+
+                <div className="botones-duracion">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDuracionTrabajo((valor) => {
+                        const nuevoValor = Math.min(
+                          valor === "" ? 1 : valor + 1,
+                          180 * 60,
+                        );
+
+                        setDuracionTrabajoInput(
+                          String(segundosAMinutos(nuevoValor)),
+                        );
+
+                        return nuevoValor;
+                      });
+                    }}
+                  >
+                    ▲
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDuracionTrabajo((valor) => {
+                        const nuevoValor = Math.max(
+                          valor === "" ? 1 : valor - 1,
+                          1,
+                        );
+
+                        setDuracionTrabajoInput(
+                          String(segundosAMinutos(nuevoValor)),
+                        );
+
+                        return nuevoValor;
+                      });
+                    }}
+                  >
+                    ▼
+                  </button>
+                </div>
+              </div>
 
               <span>min</span>
             </div>
@@ -201,25 +277,70 @@ function ConfiguracionPomodoro({ volver }) {
             </div>
 
             <div className="configuracion-input">
-              <input
-                id="duracionDescansoCorto"
-                type="number"
-                min={1 / 60}
-                max="60"
-                step={1 / 60}
-                value={
-                  duracionDescansoCorto === ""
-                    ? ""
-                    : segundosAMinutos(duracionDescansoCorto)
-                }
-                onChange={(e) =>
-                  setDuracionDescansoCorto(
-                    e.target.value === ""
-                      ? ""
-                      : minutosASegundos(Number(e.target.value)),
-                  )
-                }
-              />
+              <div className="campo-duracion">
+                <input
+                  id="duracionDescansoCorto"
+                  type="number"
+                  min="0.0166666667"
+                  max="60"
+                  step="any"
+                  value={duracionDescansoCortoInput}
+                  onChange={(e) => {
+                    const valor = e.target.value;
+
+                    setDuracionDescansoCortoInput(valor);
+
+                    if (valor === "") {
+                      setDuracionDescansoCorto("");
+                      return;
+                    }
+
+                    setDuracionDescansoCorto(minutosASegundos(Number(valor)));
+                  }}
+                />
+
+                <div className="botones-duracion">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDuracionDescansoCorto((valor) => {
+                        const nuevoValor = Math.min(
+                          valor === "" ? 1 : valor + 1,
+                          60 * 60,
+                        );
+
+                        setDuracionDescansoCortoInput(
+                          String(segundosAMinutos(nuevoValor)),
+                        );
+
+                        return nuevoValor;
+                      });
+                    }}
+                  >
+                    ▲
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDuracionDescansoCorto((valor) => {
+                        const nuevoValor = Math.max(
+                          valor === "" ? 1 : valor - 1,
+                          1,
+                        );
+
+                        setDuracionDescansoCortoInput(
+                          String(segundosAMinutos(nuevoValor)),
+                        );
+
+                        return nuevoValor;
+                      });
+                    }}
+                  >
+                    ▼
+                  </button>
+                </div>
+              </div>
 
               <span>min</span>
             </div>
@@ -233,25 +354,70 @@ function ConfiguracionPomodoro({ volver }) {
             </div>
 
             <div className="configuracion-input">
-              <input
-                id="duracionDescansoLargo"
-                type="number"
-                min={1 / 60}
-                max="60"
-                step={1 / 60}
-                value={
-                  duracionDescansoLargo === ""
-                    ? ""
-                    : segundosAMinutos(duracionDescansoLargo)
-                }
-                onChange={(e) =>
-                  setDuracionDescansoLargo(
-                    e.target.value === ""
-                      ? ""
-                      : minutosASegundos(Number(e.target.value)),
-                  )
-                }
-              />
+              <div className="campo-duracion">
+                <input
+                  id="duracionDescansoLargo"
+                  type="number"
+                  min="0.0166666667"
+                  max="60"
+                  step="any"
+                  value={duracionDescansoLargoInput}
+                  onChange={(e) => {
+                    const valor = e.target.value;
+
+                    setDuracionDescansoLargoInput(valor);
+
+                    if (valor === "") {
+                      setDuracionDescansoLargo("");
+                      return;
+                    }
+
+                    setDuracionDescansoLargo(minutosASegundos(Number(valor)));
+                  }}
+                />
+
+                <div className="botones-duracion">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDuracionDescansoLargo((valor) => {
+                        const nuevoValor = Math.min(
+                          valor === "" ? 1 : valor + 1,
+                          60 * 60,
+                        );
+
+                        setDuracionDescansoLargoInput(
+                          String(segundosAMinutos(nuevoValor)),
+                        );
+
+                        return nuevoValor;
+                      });
+                    }}
+                  >
+                    ▲
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDuracionDescansoLargo((valor) => {
+                        const nuevoValor = Math.max(
+                          valor === "" ? 1 : valor - 1,
+                          1,
+                        );
+
+                        setDuracionDescansoLargoInput(
+                          String(segundosAMinutos(nuevoValor)),
+                        );
+
+                        return nuevoValor;
+                      });
+                    }}
+                  >
+                    ▼
+                  </button>
+                </div>
+              </div>
 
               <span>min</span>
             </div>

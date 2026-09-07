@@ -98,6 +98,11 @@ function Temporizador({ actualizarDatos }) {
     console.log("⏳ Esperando Service Worker...");
 
     try {
+      console.log(
+        "Service Workers registrados:",
+        await navigator.serviceWorker.getRegistrations(),
+      );
+      console.log("Controller:", navigator.serviceWorker.controller);
       const registro = await navigator.serviceWorker.ready;
 
       console.log("✅ Service Worker listo:", registro);
@@ -135,6 +140,28 @@ function Temporizador({ actualizarDatos }) {
       console.log("✅ NOTIFICACIÓN MOSTRADA");
     } catch (error) {
       console.error("❌ ERROR MOSTRANDO NOTIFICACIÓN:", error);
+    }
+  }
+
+  async function eliminarNotificaciones() {
+    if (!("serviceWorker" in navigator)) {
+      return;
+    }
+
+    try {
+      const registro = await navigator.serviceWorker.ready;
+
+      const notificaciones = await registro.getNotifications();
+
+      notificaciones.forEach((notificacion) => {
+        if (notificacion.tag.startsWith("focusflow-")) {
+          notificacion.close();
+        }
+      });
+
+      console.log("🗑️ Notificaciones de FocusFlow eliminadas");
+    } catch (error) {
+      console.error("❌ Error eliminando notificaciones:", error);
     }
   }
 
@@ -461,6 +488,8 @@ function Temporizador({ actualizarDatos }) {
     console.log("idSesion:", idSesion);
     console.log("inicioSesion:", inicioSesion);
 
+    eliminarNotificaciones();
+
     detenerAlarma();
     setAlarmaActiva(false);
 
@@ -717,6 +746,8 @@ function Temporizador({ actualizarDatos }) {
 
   async function iniciarDescanso() {
     console.log("=== INICIANDO DESCANSO ===");
+
+    eliminarNotificaciones();
 
     setIniciandoDescanso(true);
     setError("");
@@ -1229,7 +1260,7 @@ function Temporizador({ actualizarDatos }) {
   return (
     <div>
       <div className="temporizador-modo">
-        <h2>{esTrabajo ? "🧑‍💻 Trabajo" : "🧘 Descanso"}</h2>
+        <h2>{esTrabajo ? "🧑‍💻 Concentracion" : "🧘 Descanso"}</h2>
       </div>
       <div className="temporizador-tiempo">
         {tiempoTerminado ? (
