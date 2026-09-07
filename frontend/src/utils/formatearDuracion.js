@@ -1,4 +1,8 @@
 export function formatearDuracion(segundos = 0) {
+  if (segundos === 0) {
+    return "0";
+  }
+
   const horas = Math.floor(segundos / 3600);
   const minutos = Math.floor((segundos % 3600) / 60);
   const segundosRestantes = segundos % 60;
