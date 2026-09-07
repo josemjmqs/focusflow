@@ -23,7 +23,7 @@ function Temporizador({ actualizarDatos }) {
         localStorage.getItem(`duracionTrabajo_${idUsuario}`),
       );
 
-      return duracionTrabajo ? duracionTrabajo * 60 : 25 * 60;
+      return duracionTrabajo || 25 * 60;
     } catch {
       return 25 * 60;
     }
@@ -169,23 +169,24 @@ function Temporizador({ actualizarDatos }) {
 
     if (!idUsuario) {
       return {
-        duracionTrabajo: 25,
-        duracionDescansoCorto: 5,
-        duracionDescansoLargo: 15,
+        duracionTrabajo: 25 * 60,
+        duracionDescansoCorto: 5 * 60,
+        duracionDescansoLargo: 15 * 60,
         sesionesAntesDescansoLargo: 4,
       };
     }
 
     return {
       duracionTrabajo:
-        Number(localStorage.getItem(`duracionTrabajo_${idUsuario}`)) || 25,
+        Number(localStorage.getItem(`duracionTrabajo_${idUsuario}`)) || 25 * 60,
 
       duracionDescansoCorto:
-        Number(localStorage.getItem(`duracionDescansoCorto_${idUsuario}`)) || 5,
+        Number(localStorage.getItem(`duracionDescansoCorto_${idUsuario}`)) ||
+        5 * 60,
 
       duracionDescansoLargo:
         Number(localStorage.getItem(`duracionDescansoLargo_${idUsuario}`)) ||
-        15,
+        15 * 60,
 
       sesionesAntesDescansoLargo:
         Number(
@@ -429,7 +430,7 @@ function Temporizador({ actualizarDatos }) {
 
     const configuracion = obtenerConfiguracionPomodoro();
 
-    const duracion = configuracion.duracionTrabajo * 60;
+    const duracion = configuracion.duracionTrabajo;
 
     const sesion = await crearSesion(duracion);
 
@@ -459,6 +460,10 @@ function Temporizador({ actualizarDatos }) {
     console.log("terminarTrabajo");
     console.log("idSesion:", idSesion);
     console.log("inicioSesion:", inicioSesion);
+
+    detenerAlarma();
+    setAlarmaActiva(false);
+
     if (!idSesion || !inicioSesion) {
       console.log("No se puede terminar la sesión");
       return;
@@ -506,6 +511,7 @@ function Temporizador({ actualizarDatos }) {
     try {
       setError("");
       setAlarmaActiva(false);
+      detenerAlarma();
 
       // Detener el descanso
       setActivo(false);
@@ -529,7 +535,7 @@ function Temporizador({ actualizarDatos }) {
 
       // Preparar el próximo trabajo
       const configuracion = obtenerConfiguracionPomodoro();
-      const duracionTrabajo = configuracion.duracionTrabajo * 60;
+      const duracionTrabajo = configuracion.duracionTrabajo;
 
       setTiempoRestante(duracionTrabajo);
 
@@ -762,8 +768,8 @@ function Temporizador({ actualizarDatos }) {
 
       // Calcular duración del descanso
       const duracionDescanso = esDescansoLargo
-        ? configuracion.duracionDescansoLargo * 60
-        : configuracion.duracionDescansoCorto * 60;
+        ? configuracion.duracionDescansoLargo
+        : configuracion.duracionDescansoCorto;
 
       const ahora = new Date();
 

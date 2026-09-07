@@ -21,50 +21,64 @@ function ConfiguracionPomodoro({ volver }) {
 
   const [duracionTrabajo, setDuracionTrabajo] = useState(() => {
     if (!idUsuario) {
-      return 25;
+      return 25 * 60;
     }
 
     return (
-      Number(localStorage.getItem(`duracionTrabajo_${idUsuario}`)) || 25
+      Number(localStorage.getItem(`duracionTrabajo_${idUsuario}`)) || 25 * 60
     );
   });
 
   const [duracionDescansoCorto, setDuracionDescansoCorto] = useState(() => {
     if (!idUsuario) {
-      return 5;
+      return 5 * 60;
     }
 
     return (
-      Number(localStorage.getItem(`duracionDescansoCorto_${idUsuario}`)) || 5
+      Number(localStorage.getItem(`duracionDescansoCorto_${idUsuario}`)) ||
+      5 * 60
     );
   });
 
   const [duracionDescansoLargo, setDuracionDescansoLargo] = useState(() => {
     if (!idUsuario) {
-      return 15;
+      return 15 * 60;
     }
 
     return (
-      Number(localStorage.getItem(`duracionDescansoLargo_${idUsuario}`)) || 15
+      Number(localStorage.getItem(`duracionDescansoLargo_${idUsuario}`)) ||
+      15 * 60
     );
   });
 
-  const [sesionesAntesDescansoLargo, setSesionesAntesDescansoLargo] =
-    useState(() => {
+  const [sesionesAntesDescansoLargo, setSesionesAntesDescansoLargo] = useState(
+    () => {
       if (!idUsuario) {
         return 4;
       }
 
       return (
         Number(
-          localStorage.getItem(
-            `sesionesAntesDescansoLargo_${idUsuario}`,
-          ),
+          localStorage.getItem(`sesionesAntesDescansoLargo_${idUsuario}`),
         ) || 4
       );
-    });
+    },
+  );
+
+  console.log("duracionTrabajo:", duracionTrabajo);
+  console.log("mostrado:", segundosAMinutos(duracionTrabajo));
 
   const [error, setError] = useState("");
+
+  const SEGUNDO_EN_MINUTOS = 1 / 60;
+
+  function segundosAMinutos(segundos) {
+    return segundos / 60;
+  }
+
+  function minutosASegundos(minutos) {
+    return Math.round(minutos * 60);
+  }
 
   function guardarConfiguracion() {
     if (
@@ -77,31 +91,24 @@ function ConfiguracionPomodoro({ volver }) {
       return;
     }
 
-    if (duracionTrabajo < 0.0167 || duracionTrabajo > 180) {
+    if (duracionTrabajo < 1 || duracionTrabajo > 180 * 60) {
       setError(
-        "El tiempo de concentración debe estar entre 0,0167 y 180 minutos.",
+        "El tiempo de concentración debe estar entre 1 segundo y 180 minutos.",
       );
       return;
     }
 
-    if (duracionDescansoCorto < 0.0167 || duracionDescansoCorto > 60) {
-      setError(
-        "El descanso corto debe estar entre 0,0167 y 60 minutos.",
-      );
+    if (duracionDescansoCorto < 1 || duracionDescansoCorto > 60 * 60) {
+      setError("El descanso corto debe estar entre 1 segundo y 60 minutos.");
       return;
     }
 
-    if (duracionDescansoLargo < 0.0167 || duracionDescansoLargo > 60) {
-      setError(
-        "El descanso largo debe estar entre 0,0167 y 60 minutos.",
-      );
+    if (duracionDescansoLargo < 1 || duracionDescansoLargo > 60 * 60) {
+      setError("El descanso largo debe estar entre 1 segundo y 60 minutos.");
       return;
     }
 
-    if (
-      sesionesAntesDescansoLargo < 1 ||
-      sesionesAntesDescansoLargo > 10
-    ) {
+    if (sesionesAntesDescansoLargo < 1 || sesionesAntesDescansoLargo > 10) {
       setError(
         "Las sesiones antes del descanso largo deben estar entre 1 y 10.",
       );
@@ -115,10 +122,7 @@ function ConfiguracionPomodoro({ volver }) {
 
     setError("");
 
-    localStorage.setItem(
-      `duracionTrabajo_${idUsuario}`,
-      duracionTrabajo,
-    );
+    localStorage.setItem(`duracionTrabajo_${idUsuario}`, duracionTrabajo);
 
     localStorage.setItem(
       `duracionDescansoCorto_${idUsuario}`,
@@ -155,9 +159,7 @@ function ConfiguracionPomodoro({ volver }) {
 
           <div className="configuracion-opcion">
             <div>
-              <label htmlFor="duracionTrabajo">
-                Tiempo de concentración
-              </label>
+              <label htmlFor="duracionTrabajo">Tiempo de concentración</label>
 
               <p>Duración de cada sesión de trabajo.</p>
             </div>
@@ -166,15 +168,19 @@ function ConfiguracionPomodoro({ volver }) {
               <input
                 id="duracionTrabajo"
                 type="number"
-                min="0.0167"
+                min="0.0166666667"
                 max="180"
-                step="any"
-                value={duracionTrabajo}
+                step="0.0166666667"
+                value={
+                  duracionTrabajo === ""
+                    ? ""
+                    : segundosAMinutos(duracionTrabajo)
+                }
                 onChange={(e) =>
                   setDuracionTrabajo(
                     e.target.value === ""
                       ? ""
-                      : Number(e.target.value),
+                      : minutosASegundos(Number(e.target.value)),
                   )
                 }
               />
@@ -189,9 +195,7 @@ function ConfiguracionPomodoro({ volver }) {
 
           <div className="configuracion-opcion">
             <div>
-              <label htmlFor="duracionDescansoCorto">
-                Descanso corto
-              </label>
+              <label htmlFor="duracionDescansoCorto">Descanso corto</label>
 
               <p>Descanso entre sesiones de concentración.</p>
             </div>
@@ -200,15 +204,19 @@ function ConfiguracionPomodoro({ volver }) {
               <input
                 id="duracionDescansoCorto"
                 type="number"
-                min="0.0167"
+                min={1 / 60}
                 max="60"
-                step="any"
-                value={duracionDescansoCorto}
+                step={1 / 60}
+                value={
+                  duracionDescansoCorto === ""
+                    ? ""
+                    : segundosAMinutos(duracionDescansoCorto)
+                }
                 onChange={(e) =>
                   setDuracionDescansoCorto(
                     e.target.value === ""
                       ? ""
-                      : Number(e.target.value),
+                      : minutosASegundos(Number(e.target.value)),
                   )
                 }
               />
@@ -219,9 +227,7 @@ function ConfiguracionPomodoro({ volver }) {
 
           <div className="configuracion-opcion">
             <div>
-              <label htmlFor="duracionDescansoLargo">
-                Descanso largo
-              </label>
+              <label htmlFor="duracionDescansoLargo">Descanso largo</label>
 
               <p>Descanso después de completar el ciclo.</p>
             </div>
@@ -230,15 +236,19 @@ function ConfiguracionPomodoro({ volver }) {
               <input
                 id="duracionDescansoLargo"
                 type="number"
-                min="0.0167"
+                min={1 / 60}
                 max="60"
-                step="any"
-                value={duracionDescansoLargo}
+                step={1 / 60}
+                value={
+                  duracionDescansoLargo === ""
+                    ? ""
+                    : segundosAMinutos(duracionDescansoLargo)
+                }
                 onChange={(e) =>
                   setDuracionDescansoLargo(
                     e.target.value === ""
                       ? ""
-                      : Number(e.target.value),
+                      : minutosASegundos(Number(e.target.value)),
                   )
                 }
               />
@@ -258,8 +268,8 @@ function ConfiguracionPomodoro({ volver }) {
               </label>
 
               <p>
-                Cantidad de sesiones de concentración antes de un
-                descanso largo.
+                Cantidad de sesiones de concentración antes de un descanso
+                largo.
               </p>
             </div>
 
@@ -273,9 +283,7 @@ function ConfiguracionPomodoro({ volver }) {
                 value={sesionesAntesDescansoLargo}
                 onChange={(e) =>
                   setSesionesAntesDescansoLargo(
-                    e.target.value === ""
-                      ? ""
-                      : Number(e.target.value),
+                    e.target.value === "" ? "" : Number(e.target.value),
                   )
                 }
               />
@@ -285,21 +293,14 @@ function ConfiguracionPomodoro({ volver }) {
           </div>
         </div>
 
-        {error && (
-          <p className="configuracion-error">
-            {error}
-          </p>
-        )}
+        {error && <p className="configuracion-error">{error}</p>}
 
         <div className="configuracion-acciones">
           <button className="boton-secundario" onClick={volver}>
             Volver
           </button>
 
-          <button
-            className="boton-guardar"
-            onClick={guardarConfiguracion}
-          >
+          <button className="boton-guardar" onClick={guardarConfiguracion}>
             Guardar cambios
           </button>
         </div>
