@@ -48,6 +48,7 @@ El proyecto fue desarrollado como una aplicación web full stack y se encuentra 
 focusflow/
 ├── frontend/
 ├── backend/
+├── database/
 └── docs/
 ```
 
