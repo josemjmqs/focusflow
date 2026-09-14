@@ -1273,8 +1273,6 @@ function Temporizador({ actualizarDatos }) {
         )}
       </div>
 
-      <button onClick={probarNotificacion}>Probar notificación</button>
-
       <div className="acciones-temporizador">
         {!activo && !pausado && (
           <button onClick={iniciarTemporizador} disabled={iniciando}>
