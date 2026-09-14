@@ -61,3 +61,14 @@ La carpeta `docs/` contiene la documentación del proyecto, incluyendo la especi
 Proyecto personal en desarrollo continuo.
 
 La aplicación cuenta actualmente con una versión desplegada y funcional en producción.
+
+## 📸 Capturas
+
+### Temporizador y estadísticas
+![Temporizador y estadísticas](docs/images/temporizador.jpg)
+
+### Configuración Pomodoro
+![Configuración Pomodoro](docs/images/configuracion.jpg)
+
+### Historial
+![Historial](docs/images/historial.jpg)
