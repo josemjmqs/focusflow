@@ -1,6 +1,6 @@
 # Concentra
 
-Aplicación web de productividad enfocada en mejorar y medir la concentración mediante sesiones de trabajo basadas en la técnica Pomodoro.
+Aplicación web full stack de productividad enfocada en mejorar y medir la concentración mediante sesiones de trabajo y descanso basadas en la técnica Pomodoro.
 
 ## 🚀 Demo
 
@@ -8,20 +8,31 @@ Aplicación web de productividad enfocada en mejorar y medir la concentración m
 
 ## 📋 Descripción
 
-Concentra permite registrar sesiones de concentración, configurar períodos de trabajo y descanso y consultar estadísticas e historial para realizar un seguimiento del tiempo dedicado a la concentración.
+Concentra permite registrar sesiones de concentración, configurar períodos personalizados de trabajo y descanso y consultar estadísticas e historial para realizar un seguimiento del tiempo dedicado a la concentración.
 
-El proyecto fue desarrollado como una aplicación web full stack y se encuentra desplegado en producción.
+El proyecto fue desarrollado de principio a fin como una aplicación web full stack y cuenta con una versión desplegada y funcional en producción.
 
 ## ✨ Funcionalidades
 
 - Registro e inicio de sesión de usuarios.
-- Temporizador Pomodoro.
+- Autenticación mediante JWT.
+- Temporizador basado en la técnica Pomodoro.
 - Configuración personalizada de los períodos de trabajo y descanso.
-- Registro de sesiones de concentración.
+- Registro y finalización de sesiones de concentración.
 - Historial de sesiones.
 - Estadísticas de concentración.
 - Notificaciones al finalizar los períodos del temporizador.
 - Progressive Web App (PWA) instalable desde el navegador.
+
+## 🏗️ Arquitectura
+
+La aplicación está dividida en tres partes principales:
+
+- **Frontend:** interfaz desarrollada con React, responsable de la interacción con el usuario y del funcionamiento del temporizador.
+- **Backend:** API REST desarrollada con Node.js y Express, encargada de la autenticación y de la lógica de negocio.
+- **Base de datos:** PostgreSQL, utilizada para almacenar usuarios, sesiones y datos necesarios para las estadísticas.
+
+El frontend se comunica con el backend mediante solicitudes HTTP a la API REST.
 
 ## 🛠️ Tecnologías
 
@@ -30,10 +41,14 @@ El proyecto fue desarrollado como una aplicación web full stack y se encuentra 
 - JavaScript
 - HTML
 - CSS
+- Vite
+- vite-plugin-pwa
 
 ### Backend
 - Node.js
 - Express
+- JWT
+- bcrypt
 
 ### Base de datos
 - PostgreSQL
@@ -52,23 +67,65 @@ focusflow/
 └── docs/
 ```
 
+## 💻 Instalación y ejecución local
+
+### 1. Clonar el repositorio
+
+```bash
+git clone https://github.com/josemjmqs/focusflow.git
+cd focusflow
+```
+
+### 2. Instalar dependencias del frontend
+
+```bash
+cd frontend
+npm install
+```
+
+### 3. Ejecutar el frontend
+
+```bash
+npm run dev
+```
+
+### 4. Instalar y ejecutar el backend
+
+En otra terminal:
+
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+Para ejecutar el proyecto localmente también es necesario configurar las variables de entorno y la conexión a PostgreSQL. Las credenciales y secretos deben mantenerse fuera del repositorio mediante archivos `.env`.
+
 ## 📚 Documentación
 
-La carpeta `docs/` contiene la documentación del proyecto, incluyendo la especificación, decisiones de desarrollo y documentación de la API.
+La carpeta `docs/` contiene la documentación del proyecto, incluyendo:
+
+- Especificación del proyecto.
+- Diseño y decisiones de desarrollo.
+- Estructura de la base de datos.
+- Documentación de la API REST.
 
 ## 📌 Estado del proyecto
 
-Proyecto personal en desarrollo continuo.
+Proyecto personal desarrollado y desplegado en producción.
 
-La aplicación cuenta actualmente con una versión desplegada y funcional en producción.
+La aplicación se encuentra funcional y continúa evolucionando mediante mejoras y nuevas funcionalidades.
 
 ## 📸 Capturas
 
 ### Temporizador y estadísticas
+
 ![Temporizador y estadísticas](docs/images/temporizador.jpg)
 
 ### Configuración Pomodoro
+
 ![Configuración Pomodoro](docs/images/configuracion.jpg)
 
 ### Historial
+
 ![Historial](docs/images/historial.jpg)
