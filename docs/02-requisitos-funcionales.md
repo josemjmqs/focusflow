@@ -1,99 +1,191 @@
 # Requisitos Funcionales
 
-## RF-01: Iniciar sesión de concentración
+## RF-01: Registrar usuario
 
-El usuario debe poder iniciar una sesión de concentración presionando el botón **"Iniciar"**.
+El usuario debe poder crear una cuenta proporcionando:
+
+- Nombre.
+- Correo electrónico.
+- Contraseña.
+
+El sistema verifica que el correo no esté registrado y almacena la contraseña utilizando un hash generado con bcrypt.
+
+---
+
+## RF-02: Iniciar sesión
+
+El usuario debe poder iniciar sesión utilizando su correo electrónico y contraseña.
+
+Si las credenciales son válidas, el backend genera un token JWT que identifica al usuario y permite acceder a las rutas protegidas.
+
+---
+
+## RF-03: Iniciar sesión de concentración
+
+El usuario autenticado debe poder iniciar una sesión de concentración.
 
 **Flujo básico:**
 
-1. El usuario presiona el botón **"Iniciar"**.
-2. El sistema inicia un temporizador de 25 minutos.
-3. El sistema registra la fecha y hora de inicio.
-4. El sistema crea una sesión con estado `en_progreso`.
+1. El usuario presiona **"Iniciar"**.
+2. El sistema obtiene la configuración de trabajo del usuario.
+3. El backend crea una sesión con estado `en_progreso`.
+4. Se registra la fecha y hora de inicio.
+5. El temporizador comienza a contar el tiempo configurado.
+
+El sistema impide que un mismo usuario tenga más de una sesión de concentración en progreso.
 
 ---
 
-## RF-02: Finalizar automáticamente la sesión
+## RF-04: Configurar períodos de trabajo y descanso
 
-Al completarse el tiempo del temporizador, el sistema debe finalizar automáticamente la sesión.
+El usuario debe poder personalizar la configuración del temporizador Pomodoro, incluyendo:
 
-**Flujo básico:**
+- Duración del período de trabajo.
+- Duración del descanso corto.
+- Duración del descanso largo.
+- Cantidad de sesiones antes del descanso largo.
 
-1. El temporizador llega a cero.
-2. El sistema registra la fecha y hora de finalización.
-3. El sistema calcula la duración de la sesión.
-4. El sistema cambia el estado de la sesión a `completada`.
-
----
-
-## RF-03: Registrar la sesión
-
-El sistema debe almacenar automáticamente la siguiente información de cada sesión:
-
-- Fecha y hora de inicio.
-- Fecha y hora de finalización.
-- Duración de la sesión.
-- Estado de la sesión.
+La configuración se mantiene separada para cada usuario.
 
 ---
 
-## RF-04: Consultar historial
+## RF-05: Pausar y reanudar el temporizador
 
-El usuario debe poder visualizar el historial de sesiones registradas.
+El usuario debe poder pausar una sesión de concentración o un período de descanso y posteriormente reanudarlo.
 
-Cada registro debe mostrar como mínimo:
+El temporizador conserva el tiempo acumulado para continuar desde el punto en que fue pausado.
+
+---
+
+## RF-06: Finalizar manualmente una sesión de concentración
+
+El usuario decide cuándo terminar su sesión de concentración.
+
+Al finalizar:
+
+1. El sistema registra la fecha y hora de término.
+2. Se registra la duración real de la sesión.
+3. La sesión cambia de `en_progreso` a `completada`.
+4. Las estadísticas se actualizan.
+
+El temporizador puede llegar a cero sin finalizar automáticamente la sesión. Cuando esto ocurre, la aplicación muestra el tiempo adicional de concentración y permite al usuario continuar trabajando o finalizar la sesión.
+
+---
+
+## RF-07: Gestionar períodos de descanso
+
+Al finalizar el período de concentración configurado, la aplicación puede iniciar un período de descanso según el ciclo Pomodoro configurado.
+
+El sistema distingue entre:
+
+- Descanso corto.
+- Descanso largo.
+
+La aplicación notifica al usuario cuando termina un período de trabajo o descanso.
+
+El usuario también puede continuar trabajando o descansando después de que el temporizador llegue a cero.
+
+---
+
+## RF-08: Recuperar el estado del temporizador
+
+La aplicación debe recuperar el estado de una sesión en progreso cuando el usuario vuelve a abrir la aplicación o recarga la página.
+
+Para ello:
+
+- Las sesiones de concentración en progreso se consultan en el backend.
+- El estado de los descansos se conserva localmente.
+- El temporizador calcula nuevamente el tiempo transcurrido utilizando fechas y horas.
+
+Esto permite mantener el funcionamiento del temporizador aunque la página haya sido cerrada o la aplicación haya quedado en segundo plano.
+
+---
+
+## RF-09: Consultar historial
+
+El usuario autenticado debe poder visualizar su historial de sesiones.
+
+Cada registro muestra como mínimo:
 
 - Fecha y hora de inicio.
 - Fecha y hora de finalización.
 - Duración.
 - Estado.
 
----
-
-## RF-05: Cancelar una sesión en progreso
-
-El usuario debe poder cancelar una sesión que se encuentre en estado `en_progreso`.
-
-**Flujo básico:**
-
-1. El usuario visualiza una sesión pendiente.
-2. El usuario presiona el botón **"Cancelar"**.
-3. El sistema cambia el estado de la sesión a `cancelada`.
+El historial contiene únicamente las sesiones pertenecientes al usuario autenticado.
 
 ---
 
-## RF-06: Cancelar una sesión completada
+## RF-10: Cancelar una sesión
 
-El usuario debe poder cancelar una sesión completada desde el historial para que no sea considerada en las estadísticas.
+El usuario puede cancelar una sesión dependiendo de su estado.
 
-**Flujo básico:**
+### Sesión en progreso
 
-1. El usuario selecciona una sesión completada.
-2. El usuario presiona el botón **"Cancelar"**.
-3. El sistema cambia el estado de la sesión a `cancelada`.
+Una sesión `en_progreso` puede cancelarse sin considerarse una sesión completada.
+
+### Sesión completada
+
+Una sesión `completada` puede cancelarse desde el historial para excluirla de las estadísticas.
 
 ---
 
-## RF-07: Consultar estadísticas
+## RF-11: Restaurar una sesión cancelada
 
-El usuario debe poder visualizar estadísticas de concentración.
+El usuario debe poder restaurar una sesión cancelada.
 
-Como mínimo el sistema deberá mostrar:
+Al restaurarla, la sesión vuelve al estado `completada` y vuelve a ser considerada en las estadísticas.
+
+---
+
+## RF-12: Consultar estadísticas
+
+El usuario autenticado debe poder visualizar estadísticas de concentración.
+
+La aplicación muestra:
 
 - Tiempo de concentración de hoy.
 - Tiempo de concentración de esta semana.
 - Tiempo de concentración de este mes.
-- Cantidad de sesiones completadas.
+- Cantidad total de sesiones completadas.
+- Cantidad de sesiones completadas hoy.
+- Distribución del tiempo de concentración por día durante la semana.
+
+Las estadísticas consideran únicamente sesiones con estado `completada`.
+
+Las estadísticas diarias, semanales y mensuales utilizan la fecha de inicio de la sesión y la zona horaria `America/Santiago`.
+
+---
+
+## RF-13: Notificaciones
+
+La aplicación debe poder mostrar notificaciones cuando termina un período del temporizador.
+
+Las notificaciones pueden incluir acciones para:
+
+- Iniciar el descanso.
+- Iniciar una nueva sesión de concentración.
+
+La aplicación utiliza un Service Worker para gestionar las notificaciones del navegador.
+
+---
+
+## RF-14: Instalar la aplicación como PWA
+
+La aplicación debe poder instalarse como Progressive Web App (PWA) desde un navegador compatible.
 
 ---
 
 # Reglas de negocio
 
-- Solo puede existir una sesión con estado `en_progreso`.
-- Una sesión se crea con estado `en_progreso`.
-- Una sesión finalizada cambia automáticamente a `completada`.
+- Cada sesión pertenece a un único usuario.
+- Solo puede existir una sesión `en_progreso` por usuario.
+- Una sesión nueva se crea con estado `en_progreso`.
+- Una sesión finalizada manualmente cambia a `completada`.
 - Una sesión `en_progreso` puede cambiar a `cancelada`.
 - Una sesión `completada` puede cambiar a `cancelada`.
+- Una sesión `cancelada` puede restaurarse a `completada`.
 - Las sesiones `cancelada` no se consideran en las estadísticas.
-- Las estadísticas diarias, semanales y mensuales consideran que una sesión pertenece al período en el que fue iniciada (`inicio`).
-- Las estadísticas se calculan utilizando la zona horaria de Chile (`America/Santiago`).
+- Las estadísticas se calculan únicamente sobre sesiones del usuario autenticado.
+- La configuración del temporizador se mantiene separada por usuario.
+- Las estadísticas utilizan la zona horaria de Chile (`America/Santiago`).
