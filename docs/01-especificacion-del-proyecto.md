@@ -8,19 +8,19 @@
 
 ## 2. Objetivo
 
-Desarrollar una aplicación web que permita organizar sesiones de concentración, registrar el tiempo dedicado a actividades productivas y facilitar el seguimiento del progreso mediante un historial de sesiones y estadísticas.
+Desarrollar una aplicación web de productividad que permita organizar sesiones de concentración, registrar el tiempo dedicado a actividades productivas y facilitar el seguimiento del progreso mediante un historial y estadísticas.
 
 ---
 
 ## 3. Problema que resuelve
 
-Muchas personas tienen dificultades para mantener la concentración durante períodos prolongados o no saben cuánto tiempo realmente dedican a actividades productivas. Concentra busca resolver este problema proporcionando herramientas para planificar sesiones de trabajo, registrar el tiempo de concentración y visualizar el progreso.
+Muchas personas tienen dificultades para mantener la concentración durante períodos prolongados o no tienen una forma sencilla de registrar cuánto tiempo dedican a sus actividades. Concentra busca resolver este problema proporcionando un temporizador de concentración, registro de sesiones y herramientas para visualizar el tiempo acumulado.
 
 ---
 
 ## 4. Público objetivo
 
-La aplicación está dirigida a personas que desean mejorar su productividad y administrar mejor su tiempo, entre ellas:
+La aplicación está dirigida a personas que desean organizar mejor sus períodos de concentración y realizar un seguimiento de su tiempo productivo, entre ellas:
 
 * Estudiantes.
 * Profesionales.
@@ -34,14 +34,21 @@ La aplicación está dirigida a personas que desean mejorar su productividad y a
 La aplicación cuenta actualmente con las siguientes funcionalidades:
 
 * Registro e inicio de sesión de usuarios.
+* Autenticación mediante JWT.
 * Temporizador de concentración inspirado en la técnica Pomodoro.
-* Inicio y finalización manual de sesiones de concentración.
 * Configuración personalizada de los períodos de trabajo y descanso.
-* Registro automático del historial de sesiones.
-* Visualización del historial con fecha y duración de cada sesión.
-* Estadísticas de concentración mediante períodos diarios, semanales y mensuales.
+* Inicio y finalización manual de sesiones de concentración.
+* Pausar y reanudar una sesión.
+* Continuar una sesión cuando el temporizador llega a cero, registrando el tiempo adicional de concentración.
+* Cancelación de sesiones en progreso y posibilidad de restaurarlas.
+* Registro persistente del historial de sesiones.
+* Visualización del historial con fecha, duración y estado de las sesiones.
+* Estadísticas de concentración para períodos diarios, semanales y mensuales.
 * Notificaciones al finalizar los períodos del temporizador.
+* Persistencia de parte del estado del temporizador y configuración mediante localStorage.
 * Progressive Web App (PWA) instalable desde el navegador.
+
+La duración configurada para el período de concentración funciona como una referencia del temporizador. La sesión no se finaliza automáticamente al llegar a cero, ya que el usuario decide cuándo terminarla.
 
 ---
 
@@ -61,20 +68,32 @@ En versiones posteriores se podrán incorporar funcionalidades como:
 ### Frontend
 
 * React
+* Vite
 * React Router
+* JavaScript
 * HTML5
 * CSS
-* JavaScript
 
 ### Backend
 
 * Node.js
 * Express
 * API REST
+* JWT
+* bcrypt
 
 ### Base de datos
 
 * PostgreSQL
+
+### Persistencia local
+
+* localStorage
+
+### PWA
+
+* Service Worker
+* Web App Manifest
 
 ### Control de versiones
 
