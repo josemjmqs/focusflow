@@ -493,6 +493,9 @@ function Temporizador({ actualizarDatos }) {
     const id = idSesionRef.current;
     const inicio = inicioTemporizadorRef.current;
 
+    console.log("idSesionRef:", idSesionRef.current);
+    console.log("inicioTemporizadorRef:", inicioTemporizadorRef.current);
+
     if (!id || !inicio) {
       console.log("No se puede terminar la sesión");
       return;
@@ -665,6 +668,7 @@ function Temporizador({ actualizarDatos }) {
 
       setTiempoAcumulado(transcurrido);
       setInicioTemporizador(null);
+      inicioTemporizadorRef.current = null;
 
       if (modo === "descanso") {
         guardarEstadoDescanso({
@@ -707,6 +711,7 @@ function Temporizador({ actualizarDatos }) {
       }
     } else {
       setInicioTemporizador(ahora);
+      inicioTemporizadorRef.current = ahora;
 
       if (modo === "trabajo") {
         localStorage.removeItem("estadoTrabajo");
@@ -1064,6 +1069,7 @@ function Temporizador({ actualizarDatos }) {
           }
 
           setIdSesion(sesion.id);
+          idSesionRef.current = sesion.id;
           setInicioSesion(new Date(sesion.inicio));
           setInicioTemporizador(null);
           setTiempoAcumulado(estadoTrabajo.tiempoAcumulado || 0);
