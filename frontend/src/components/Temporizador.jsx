@@ -485,23 +485,27 @@ function Temporizador({ actualizarDatos }) {
 
   async function terminarTrabajo() {
     console.log("terminarTrabajo");
-    console.log("idSesion:", idSesion);
-    console.log("inicioSesion:", inicioSesion);
 
     eliminarNotificaciones();
-
     detenerAlarma();
     setAlarmaActiva(false);
 
-    if (!idSesion || !inicioSesion) {
+    const id = idSesionRef.current;
+    const inicio = inicioTemporizadorRef.current;
+
+    if (!id || !inicio) {
       console.log("No se puede terminar la sesión");
       return;
     }
 
-    const duracion = calcularSegundosTranscurridos();
+    const duracion = calcularSegundosTranscurridos(inicio);
+
+    console.log("idSesion:", id);
+    console.log("inicio:", inicio);
     console.log("Duración:", duracion);
     console.log("Finalizando sesión...");
-    await finalizarSesion(idSesion, duracion);
+
+    await finalizarSesion(id, duracion);
     console.log("Sesión finalizada correctamente");
     setInicioSesion(null);
     setInicioTemporizador(null);
