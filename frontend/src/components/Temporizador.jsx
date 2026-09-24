@@ -453,8 +453,6 @@ function Temporizador({ actualizarDatos }) {
 
   // Funciones relacionadas con sesiones
   async function iniciarTrabajo() {
-    const fechaInicio = new Date();
-
     const configuracion = obtenerConfiguracionPomodoro();
 
     const duracion = configuracion.duracionTrabajo;
@@ -463,6 +461,8 @@ function Temporizador({ actualizarDatos }) {
 
     borrarEstadoDescanso();
     localStorage.removeItem("modoTemporizador");
+
+    const fechaInicio = new Date(sesion.inicio);
 
     setIdSesion(sesion.id);
     idSesionRef.current = sesion.id;
@@ -606,6 +606,7 @@ function Temporizador({ actualizarDatos }) {
           setModo("trabajo");
           setPausado(false);
           setActivo(true);
+          activoRef.current = true;
 
           const transcurrido = Math.floor(
             (Date.now() - inicio.getTime()) / 1000,
