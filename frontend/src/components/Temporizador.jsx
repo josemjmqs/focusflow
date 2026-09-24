@@ -602,6 +602,7 @@ function Temporizador({ actualizarDatos }) {
           const duracion = sesion.duracion_objetivo;
 
           setIdSesion(sesion.id);
+          idSesionRef.current = sesion.id;
           setInicioSesion(inicio);
           setInicioTemporizador(inicio);
           inicioTemporizadorRef.current = inicio;
@@ -1101,6 +1102,7 @@ function Temporizador({ actualizarDatos }) {
         const duracion = sesion.duracion_objetivo;
 
         setIdSesion(sesion.id);
+        idSesionRef.current = sesion.id;
         setInicioSesion(inicio);
         setInicioTemporizador(inicio);
         setTiempoAcumulado(0);
