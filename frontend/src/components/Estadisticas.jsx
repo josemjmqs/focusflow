@@ -8,15 +8,10 @@ import "./Estadisticas.css";
 function Estadisticas({ actualizar }) {
   const [datos, setDatos] = useState(null);
 
-  console.log("DATOS ACTUALES:", datos);
-
   useEffect(() => {
     const cargarEstadisticas = () => {
-      console.log("Cargando estadísticas...", new Date().toLocaleTimeString());
-
       obtenerEstadisticas()
         .then((resultado) => {
-          console.log("ESTADÍSTICAS RECIBIDAS:", resultado);
           setDatos(resultado);
         })
         .catch((error) => {
