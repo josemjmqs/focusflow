@@ -1109,8 +1109,11 @@ function Temporizador({ actualizarDatos }) {
 
         setIdSesion(sesion.id);
         idSesionRef.current = sesion.id;
+
         setInicioSesion(inicio);
         setInicioTemporizador(inicio);
+        inicioTemporizadorRef.current = inicio;
+
         setTiempoAcumulado(0);
         setDuracionActual(duracion);
         setModo("trabajo");
