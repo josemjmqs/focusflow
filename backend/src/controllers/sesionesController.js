@@ -24,7 +24,7 @@ export const obtenerSesiones = async (req, res) => {
 
 export const crearSesion = async (req, res) => {
   const usuarioId = req.usuario.id;
-  const { duracionObjetivo } = req.body;
+  const { duracionObjetivo, inicio } = req.body;
 
   try {
     const resultado = await pool.query(
@@ -41,7 +41,6 @@ export const crearSesion = async (req, res) => {
       });
     }
 
-    const inicio = new Date();
     const estado = "en_progreso";
 
     const nuevaSesion = await pool.query(
@@ -75,7 +74,7 @@ export const crearSesion = async (req, res) => {
 export const finalizarSesion = async (req, res) => {
   try {
     const { id } = req.params;
-    const { duracion } = req.body;
+    const { duracion, fin } = req.body;
 
     const usuarioId = req.usuario.id;
 
@@ -100,8 +99,6 @@ export const finalizarSesion = async (req, res) => {
         mensaje: "La sesión no está en progreso",
       });
     }
-
-    const fin = new Date();
 
     const resultadoActualizado = await pool.query(
       `UPDATE sesiones

@@ -47,7 +47,7 @@ export const obtenerSesiones = async () => {
   });
 };
 
-export const crearSesion = async (duracionObjetivo) => {
+export async function crearSesion(duracionObjetivo, inicio) {
   return realizarPeticion(`${API_URL}/sesiones`, {
     method: "POST",
     headers: {
@@ -56,11 +56,12 @@ export const crearSesion = async (duracionObjetivo) => {
     },
     body: JSON.stringify({
       duracionObjetivo,
+      inicio,
     }),
   });
-};
+}
 
-export const finalizarSesion = async (id, duracion) => {
+export async function finalizarSesion(id, duracion, fin) {
   return realizarPeticion(`${API_URL}/sesiones/${id}`, {
     method: "PUT",
     headers: {
@@ -69,9 +70,10 @@ export const finalizarSesion = async (id, duracion) => {
     },
     body: JSON.stringify({
       duracion,
+      fin,
     }),
   });
-};
+}
 
 export const cancelarSesion = async (id) => {
   return realizarPeticion(`${API_URL}/sesiones/${id}/cancelar`, {
