@@ -57,15 +57,9 @@ self.addEventListener("notificationclick", (event) => {
         includeUncontrolled: true,
       })
       .then(async (clientes) => {
-        console.log("CLIENTES ENCONTRADOS:", clientes.length);
-        console.log("ACCIÓN RECIBIDA:", accion);
-        console.log("ACCIONES DE LA NOTIFICACIÓN:", event.notification.actions);
-        console.log("CLIENT ID:", clientId);
-
         const cliente = clientes.find((cliente) => cliente.id === clientId);
 
         if (!cliente) {
-          console.log("❌ No se encontró el cliente de la notificación");
           return;
         }
 

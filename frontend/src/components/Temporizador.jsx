@@ -77,35 +77,20 @@ function Temporizador({ actualizarDatos }) {
   }
 
   async function probarNotificacion() {
-    console.log("=== PRUEBA NOTIFICACIÓN ===");
-
     await mostrarNotificacion("FocusFlow", "Prueba de notificación", "trabajo");
   }
 
   async function mostrarNotificacion(titulo, mensaje, modoNotificacion) {
-    console.log("=== INTENTANDO MOSTRAR NOTIFICACIÓN ===");
-
     if (Notification.permission !== "granted") {
-      console.log("❌ Permiso no concedido");
       return;
     }
 
     if (!("serviceWorker" in navigator)) {
-      console.log("❌ Service Worker no disponible");
       return;
     }
 
-    console.log("⏳ Esperando Service Worker...");
-
     try {
-      console.log(
-        "Service Workers registrados:",
-        await navigator.serviceWorker.getRegistrations(),
-      );
-      console.log("Controller:", navigator.serviceWorker.controller);
       const registro = await navigator.serviceWorker.ready;
-
-      console.log("✅ Service Worker listo:", registro);
 
       const acciones =
         modoNotificacion === "trabajo"
@@ -122,8 +107,6 @@ function Temporizador({ actualizarDatos }) {
               },
             ];
 
-      console.log("Acciones:", acciones);
-
       await registro.showNotification(titulo, {
         body: mensaje,
         icon: "/pwa-192x192.png",
@@ -136,8 +119,6 @@ function Temporizador({ actualizarDatos }) {
           clientId: clientIdRef.current,
         },
       });
-
-      console.log("✅ NOTIFICACIÓN MOSTRADA");
     } catch (error) {
       console.error("❌ ERROR MOSTRANDO NOTIFICACIÓN:", error);
     }
@@ -159,7 +140,6 @@ function Temporizador({ actualizarDatos }) {
         }
       });
 
-      console.log("🗑️ Notificaciones de FocusFlow eliminadas");
     } catch (error) {
       console.error("❌ Error eliminando notificaciones:", error);
     }
@@ -295,11 +275,6 @@ function Temporizador({ actualizarDatos }) {
   }
 
   function terminarTemporizador(momentoFinalizacion) {
-    console.log("=== TERMINÓ TEMPORIZADOR ===");
-    console.log("Modo:", modo);
-    console.log("document.hidden:", document.hidden);
-    console.log("Permiso:", Notification.permission);
-
     setTiempoRestante(0);
     setTiempoTerminado(true);
     setAlarmaActiva(true);
@@ -325,8 +300,6 @@ function Temporizador({ actualizarDatos }) {
     }
 
     if (document.hidden) {
-      console.log("=== INTENTANDO MOSTRAR NOTIFICACIÓN ===");
-
       mostrarNotificacion(
         "FocusFlow",
         modo === "trabajo"
@@ -484,8 +457,6 @@ function Temporizador({ actualizarDatos }) {
   }
 
   async function terminarTrabajo() {
-    console.log("terminarTrabajo");
-
     eliminarNotificaciones();
     detenerAlarma();
     setAlarmaActiva(false);
@@ -493,25 +464,15 @@ function Temporizador({ actualizarDatos }) {
     const id = idSesionRef.current;
     const inicio = inicioTemporizadorRef.current;
 
-    console.log("idSesionRef:", idSesionRef.current);
-    console.log("inicioTemporizadorRef:", inicioTemporizadorRef.current);
-
     if (!id || !inicio) {
-      console.log("No se puede terminar la sesión");
       return;
     }
 
     const duracion = calcularSegundosTranscurridos(inicio);
 
-    console.log("idSesion:", id);
-    console.log("inicio:", inicio);
-    console.log("Duración:", duracion);
-    console.log("Finalizando sesión...");
-
     const fin = new Date();
 
     await finalizarSesion(id, duracion, fin);
-    console.log("Sesión finalizada correctamente");
     setInicioSesion(null);
     setInicioTemporizador(null);
     setTiempoAcumulado(0);
@@ -521,7 +482,6 @@ function Temporizador({ actualizarDatos }) {
     inicioTemporizadorRef.current = null;
 
     actualizarDatos();
-    console.log("terminarTrabajo terminado");
   }
 
   async function terminarSesionManual() {
@@ -758,8 +718,6 @@ function Temporizador({ actualizarDatos }) {
   }
 
   async function iniciarDescanso() {
-    console.log("=== INICIANDO DESCANSO ===");
-
     eliminarNotificaciones();
 
     setIniciandoDescanso(true);
@@ -771,16 +729,11 @@ function Temporizador({ actualizarDatos }) {
         inicioTemporizadorRef.current,
       );
 
-      console.log("Duración trabajo:", duracion);
-      console.log("Finalizando sesión:", idSesionRef.current);
-
       const fin = new Date();
 
       await finalizarSesion(idSesionRef.current, duracion, fin);
 
       actualizarDatos();
-
-      console.log("Sesión finalizada");
 
       // Limpiar sesión anterior
       setInicioSesion(null);
@@ -824,10 +777,6 @@ function Temporizador({ actualizarDatos }) {
         ahora.getTime() + duracionDescanso * 1000,
       );
 
-      console.log("Duración descanso:", duracionDescanso);
-      console.log("Iniciando descanso a:", ahora);
-      console.log("Fecha finalización:", fechaFinalizacion);
-
       // Configurar temporizador
       setModo("descanso");
       setTiempoTerminado(false);
@@ -862,7 +811,6 @@ function Temporizador({ actualizarDatos }) {
 
       localStorage.setItem("modoTemporizador", "descanso");
 
-      console.log("=== DESCANSO INICIADO ===");
     } catch (error) {
       console.error("Error iniciando descanso:", error);
 
@@ -1215,11 +1163,6 @@ function Temporizador({ actualizarDatos }) {
         return;
       }
 
-      console.log("=== ACCIÓN DESDE NOTIFICACIÓN ===");
-      console.log("Acción:", event.data.accion);
-      console.log("ID SESIÓN:", idSesionRef.current);
-      console.log("INICIO TEMPORIZADOR:", inicioTemporizadorRef.current);
-
       if (event.data.accion === "iniciar-descanso") {
         iniciarDescansoRef.current?.();
       }
@@ -1246,8 +1189,6 @@ function Temporizador({ actualizarDatos }) {
     canal.port1.onmessage = (event) => {
       if (event.data?.tipo === "client-id") {
         clientIdRef.current = event.data.clientId;
-
-        console.log("CLIENT ID ACTUAL:", clientIdRef.current);
       }
     };
 

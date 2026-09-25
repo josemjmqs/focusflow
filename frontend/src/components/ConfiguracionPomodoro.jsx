@@ -96,9 +96,6 @@ function ConfiguracionPomodoro({ volver }) {
     },
   );
 
-  console.log("duracionTrabajo:", duracionTrabajo);
-  console.log("mostrado:", segundosAMinutos(duracionTrabajo));
-
   const [error, setError] = useState("");
 
   const SEGUNDO_EN_MINUTOS = 1 / 60;
