@@ -457,12 +457,12 @@ function Temporizador({ actualizarDatos }) {
 
     const duracion = configuracion.duracionTrabajo;
 
-    const sesion = await crearSesion(duracion);
+    const fechaInicio = new Date();
+
+    const sesion = await crearSesion(duracion, fechaInicio);
 
     borrarEstadoDescanso();
     localStorage.removeItem("modoTemporizador");
-
-    const fechaInicio = new Date(sesion.inicio);
 
     setIdSesion(sesion.id);
     idSesionRef.current = sesion.id;
@@ -508,7 +508,9 @@ function Temporizador({ actualizarDatos }) {
     console.log("Duración:", duracion);
     console.log("Finalizando sesión...");
 
-    await finalizarSesion(id, duracion);
+    const fin = new Date();
+
+    await finalizarSesion(id, duracion, fin);
     console.log("Sesión finalizada correctamente");
     setInicioSesion(null);
     setInicioTemporizador(null);
@@ -772,7 +774,9 @@ function Temporizador({ actualizarDatos }) {
       console.log("Duración trabajo:", duracion);
       console.log("Finalizando sesión:", idSesionRef.current);
 
-      await finalizarSesion(idSesionRef.current, duracion);
+      const fin = new Date();
+
+      await finalizarSesion(idSesionRef.current, duracion, fin);
 
       actualizarDatos();
 
