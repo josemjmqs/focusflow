@@ -6,9 +6,38 @@ export const registrar = async (req, res) => {
   try {
     const { nombre, email, password } = req.body;
 
+    if (
+      typeof nombre !== "string" ||
+      !nombre.trim() ||
+      nombre.trim().length > 100
+    ) {
+      return res.status(400).json({
+        mensaje:
+          "El nombre es obligatorio y debe tener como máximo 100 caracteres",
+      });
+    }
+
+    if (
+      typeof email !== "string" ||
+      !email.trim() ||
+      !/^\S+@\S+\.\S+$/.test(email.trim())
+    ) {
+      return res.status(400).json({
+        mensaje: "El correo electrónico no es válido",
+      });
+    }
+
+    if (typeof password !== "string" || password.length < 6) {
+      return res.status(400).json({
+        mensaje: "La contraseña debe tener al menos 6 caracteres",
+      });
+    }
+
+    const emailNormalizado = email.trim().toLowerCase();
+
     const usuarioExistente = await pool.query(
       "SELECT * FROM usuarios WHERE email = $1",
-      [email]
+      [emailNormalizado],
     );
 
     if (usuarioExistente.rows.length > 0) {
@@ -23,11 +52,10 @@ export const registrar = async (req, res) => {
       `INSERT INTO usuarios (nombre, email, password)
        VALUES ($1, $2, $3)
        RETURNING id, nombre, email`,
-      [nombre, email, passwordHash]
+      [nombre.trim(), emailNormalizado, passwordHash],
     );
 
     res.status(201).json(resultado.rows[0]);
-
   } catch (error) {
     console.error(error);
 
@@ -41,9 +69,22 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    if (
+      typeof email !== "string" ||
+      !email.trim() ||
+      typeof password !== "string" ||
+      !password
+    ) {
+      return res.status(400).json({
+        mensaje: "El correo y la contraseña son obligatorios",
+      });
+    }
+
+    const emailNormalizado = email.trim().toLowerCase();
+
     const resultado = await pool.query(
       "SELECT * FROM usuarios WHERE email = $1",
-      [email]
+      [emailNormalizado],
     );
 
     if (resultado.rows.length === 0) {
@@ -54,10 +95,7 @@ export const login = async (req, res) => {
 
     const usuario = resultado.rows[0];
 
-    const passwordCorrecta = await bcrypt.compare(
-      password,
-      usuario.password
-    );
+    const passwordCorrecta = await bcrypt.compare(password, usuario.password);
 
     if (!passwordCorrecta) {
       return res.status(401).json({
@@ -74,7 +112,7 @@ export const login = async (req, res) => {
       process.env.JWT_SECRET,
       {
         expiresIn: "24h",
-      }
+      },
     );
 
     res.json({

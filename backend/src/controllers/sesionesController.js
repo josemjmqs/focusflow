@@ -26,6 +26,24 @@ export const crearSesion = async (req, res) => {
   const usuarioId = req.usuario.id;
   const { duracionObjetivo, inicio } = req.body;
 
+  if (
+    !Number.isInteger(duracionObjetivo) ||
+    duracionObjetivo < 1 ||
+    duracionObjetivo > 10800
+  ) {
+    return res.status(400).json({
+      mensaje: "La duración debe estar entre 1 segundo y 180 minutos",
+    });
+  }
+
+  const fechaInicio = new Date(inicio);
+
+  if (Number.isNaN(fechaInicio.getTime())) {
+    return res.status(400).json({
+      mensaje: "La fecha de inicio no es válida",
+    });
+  }
+
   try {
     const resultado = await pool.query(
       `SELECT *
@@ -52,7 +70,7 @@ export const crearSesion = async (req, res) => {
       )
       VALUES ($1, $2, $3, $4)
       RETURNING *`,
-      [usuarioId, inicio, estado, duracionObjetivo],
+      [usuarioId, fechaInicio, estado, duracionObjetivo],
     );
 
     res.status(201).json(nuevaSesion.rows[0]);
@@ -75,6 +93,26 @@ export const finalizarSesion = async (req, res) => {
   try {
     const { id } = req.params;
     const { duracion, fin } = req.body;
+
+    if (!/^\d+$/.test(id) || Number(id) <= 0) {
+      return res.status(400).json({
+        mensaje: "El ID de la sesión no es válido",
+      });
+    }
+
+    if (!Number.isInteger(duracion) || duracion < 0) {
+      return res.status(400).json({
+        mensaje: "La duración debe ser un número entero mayor o igual a 0",
+      });
+    }
+
+    const fechaFin = new Date(fin);
+
+    if (Number.isNaN(fechaFin.getTime())) {
+      return res.status(400).json({
+        mensaje: "La fecha de finalización no es válida",
+      });
+    }
 
     const usuarioId = req.usuario.id;
 
@@ -108,7 +146,7 @@ export const finalizarSesion = async (req, res) => {
       WHERE id = $4
       AND usuario_id = $5
       RETURNING *`,
-      [fin, duracion, "completada", id, usuarioId],
+      [fechaFin, duracion, "completada", id, usuarioId],
     );
 
     res.json(resultadoActualizado.rows[0]);
@@ -125,6 +163,12 @@ export const cancelarSesion = async (req, res) => {
   try {
     const { id } = req.params;
     const usuarioId = req.usuario.id;
+
+    if (!/^\d+$/.test(id) || Number(id) <= 0) {
+      return res.status(400).json({
+        mensaje: "El ID de la sesión no es válido",
+      });
+    }
 
     const resultado = await pool.query(
       `SELECT *
@@ -177,6 +221,12 @@ export const cancelarSesionEnProgreso = async (req, res) => {
   try {
     const { id } = req.params;
     const usuarioId = req.usuario.id;
+
+    if (!/^\d+$/.test(id) || Number(id) <= 0) {
+      return res.status(400).json({
+        mensaje: "El ID de la sesión no es válido",
+      });
+    }
 
     const resultado = await pool.query(
       `
@@ -233,6 +283,12 @@ export const restaurarSesion = async (req, res) => {
   try {
     const { id } = req.params;
     const usuarioId = req.usuario.id;
+
+    if (!/^\d+$/.test(id) || Number(id) <= 0) {
+      return res.status(400).json({
+        mensaje: "El ID de la sesión no es válido",
+      });
+    }
 
     const resultado = await pool.query(
       `SELECT *
