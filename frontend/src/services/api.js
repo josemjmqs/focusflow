@@ -4,16 +4,16 @@ const obtenerToken = () => {
   return localStorage.getItem("token");
 };
 
-const manejarRespuesta = async (respuesta) => {
-  if (respuesta.status === 401) {
-    localStorage.removeItem("token");
-    window.location.reload();
-    return;
-  }
-
+const manejarRespuesta = async (respuesta, requiereAutenticacion) => {
   const datos = await respuesta.json();
 
   if (!respuesta.ok) {
+    if (respuesta.status === 401 && requiereAutenticacion) {
+      localStorage.removeItem("token");
+      window.location.reload();
+      return;
+    }
+
     throw new Error(datos.mensaje || "Error en la petición");
   }
 
@@ -21,13 +21,17 @@ const manejarRespuesta = async (respuesta) => {
 };
 
 async function realizarPeticion(url, opciones = {}) {
-  try {
-    const respuesta = await fetch(url, opciones);
+  let respuesta;
 
-    return manejarRespuesta(respuesta);
+  try {
+    respuesta = await fetch(url, opciones);
   } catch {
     throw new Error("No fue posible conectarse con el servidor.");
   }
+
+  const requiereAutenticacion = Boolean(opciones.headers?.Authorization);
+
+  return manejarRespuesta(respuesta, requiereAutenticacion);
 }
 
 export const obtenerEstadisticas = async () => {
